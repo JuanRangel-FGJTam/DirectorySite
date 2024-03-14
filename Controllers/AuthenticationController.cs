@@ -37,10 +37,8 @@ namespace DirectorySite.Controllers
             }
 
             // Store token securely, e.g., in session
-            // Session["JWTToken"] = token;
-            loginRequest.ErrorMessage = token;
-            return View("Index", loginRequest );
-
+            HttpContext.Session.SetString( "JWTToken", token);
+            
             // Redirect to a secure page
             return RedirectToAction("Index", "Home");
 
