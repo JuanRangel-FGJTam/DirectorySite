@@ -1,0 +1,35 @@
+@model DirectorySite.Models.ViewModel.LoginRequest
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="container mt-4" style="width: 24rem;">
+
+    
+
+    <div class="row border rounded p-4" style="background-color: whitesmoke;">
+    @using( Html.BeginForm("Login", "Authentication", FormMethod.Post )){
+        <!-- Email input -->
+        <div class="form-outline mb-4">
+            <input asp-for="Email" class="form-control" />
+            <label asp-for="Email" >Email address</label>
+        </div>
+
+        <!-- Password input -->
+        <div class="form-outline mb-4">
+            <input asp-for="Password" class="form-control" />
+            <label asp-for="Password">Password</label>
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary btn-block mb-2 px-5">Sign in</button>
+    }
+
+    @if( Model is not null){
+        @Html.DisplayFor( model=>model.ErrorMessage, "Errormessage")
+    }
+
+    </div>
+
+</div>
