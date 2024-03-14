@@ -1,12 +1,11 @@
 @model DirectorySite.Models.ViewModel.LoginRequest
 
 @{
+    Layout = "_LayoutGuest";
     ViewData["Title"] = "Index";
 }
 
 <div class="container mt-4" style="width: 24rem;">
-
-    
 
     <div class="row border rounded p-4" style="background-color: whitesmoke;">
     @using( Html.BeginForm("Login", "Authentication", FormMethod.Post )){

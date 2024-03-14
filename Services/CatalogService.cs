@@ -9,7 +9,7 @@ namespace DirectorySite.Services
     {
         private readonly ILogger<CatalogService> logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
-        private readonly string authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMiLCJuYmYiOjE3MTAzNTE2NjAsImV4cCI6MTcxODMwMDQ2MCwiaWF0IjoxNzEwMzUxNjYwfQ._bDpYYC-jXsKVl2ZE-K7jNjHZnQeFfLEON-ZHC-k6Zc";
+        private readonly string authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzIiwiZW1haWwiOiJqdWFuLnJhbmdlbEBmZ2p0YW0uZ29iLm14IiwibmFtZSI6Ikp1YW4gU2FsdmFkb3IgUmFuZ2VsIiwibmJmIjoxNzEwNDM0NDQyLCJleHAiOjE3MTE3MzA0NDIsImlhdCI6MTcxMDQzNDQ0MiwiaXNzIjoiaHR0cHM6Ly9kaXJlY3RvcnlBUEkuZmdqdGFtLmdvYi5teCIsImF1ZCI6Imh0dHBzOi8vZmdqdGFtLmdvYi5teCJ9.TleqLm5O72MZL5cXUu6cy0J4nzJzKbZqlgeqjoHIkR0";
 
 
         public async Task<IEnumerable<Occupation>?> GetOccupations()

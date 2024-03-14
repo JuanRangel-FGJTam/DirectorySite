@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -9,6 +10,11 @@
     <link rel="stylesheet" href="~/DirectorySite.styles.css" asp-append-version="true" />
 </head>
 <body>
+    @{
+
+        var usernameClaim = User.Claims.Where( c => c.Type == ClaimTypes.Email ).FirstOrDefault();
+        ViewData["UserName"] = usernameClaim !=null ? usernameClaim.Value :"";
+    }
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -31,6 +37,10 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
+                </div>
+
+                <div>
+                    Welcome: @ViewBag.UserName
                 </div>
             </div>
         </nav>

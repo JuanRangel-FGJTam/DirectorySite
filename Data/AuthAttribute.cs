@@ -20,9 +20,9 @@ namespace DirectorySite.Data
         {
             // TODO: Inject this settings
             _jwtSettings =  new JwtSettings(){
-                Issuer="",
-                Audience="",
-                Key=""
+                Issuer="https://directoryAPI.fgjtam.gob.mx",
+                Audience="https://fgjtam.gob.mx",
+                Key="e4b412d9dca447f5a651e0e729c5eeb9"
             };
         }
 

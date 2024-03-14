@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using DirectorySite.Data;
 using DirectorySite.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+
 
 namespace DirectorySite.Controllers
 {
+    [Auth]
     [Route("[controller]")]
     public class CatalogController(ILogger<CatalogController> logger, CatalogService catalogService) : Controller
     {
