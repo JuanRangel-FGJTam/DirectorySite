@@ -1,19 +1,10 @@
 ﻿@model IEnumerable<DirectorySite.Models.Nationality>?
 @{
     ViewData["Title"] = "Catalog Page - Nationalities";
+    ViewData["ActivePage"] = "Nationalities";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Catalogs</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
-
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Catalog">Catalogs</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Nationalities</li>
-  </ol>
-</nav>
+@Html.Partial("./Partials/PageHeader")
 
 <div class="fluid-container ">
     <div class="row align-items-start">

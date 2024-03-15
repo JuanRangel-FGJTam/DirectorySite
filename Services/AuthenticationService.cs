@@ -18,16 +18,11 @@ namespace DirectorySite.Services
 
         public string? Authenticate( IUserCredentials credentials, out string message ){
 
-            Console.WriteLine("(-) Init auth service");
-
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpResponse = httpClient.PostAsJsonAsync("/user/authenticate", new {
                 email = credentials.Email,
                 password = credentials.Password
             }).Result;
-            
-
-            Console.WriteLine("(-) Get response");
 
             if( !httpResponse.IsSuccessStatusCode ){
                 if( httpResponse.StatusCode == HttpStatusCode.BadRequest){

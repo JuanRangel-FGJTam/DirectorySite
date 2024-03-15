@@ -1,13 +1,26 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var nameClaim = User.Claims.Where( c => c.Type == "name" ).FirstOrDefault();
+    ViewData["Name"] = nameClaim != null ? nameClaim.Value :"";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-
-    <div class="border p-5 rounded badge text-wrap text-black">
-        @ViewBag.Token
+<div class="container">
+    <div class="row">
+        <div class="text-center col-12">
+            <h1 class="display-4">Welcome</h1>
+            <h5 class="my-2 text-muted">@ViewBag.Name</h5>
+        </div>
     </div>
-    
+
+    <div class="row">
+        <div class="col-10 mx-auto mt-4">
+            <h3 class="mt-4">Token:</h3>
+            @Html.TextArea("token", (string)ViewBag.Token, htmlAttributes: new {
+                @class="w-100 h-100 px-4 py-2 text-center border rounded font-monospace",
+                @style="resize: none; background: #eee;",
+                @readonly=true
+            })
+        </div>
+    </div>
+
 </div>
