@@ -17,6 +17,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient( "DirectoryAPI", o => o.BaseAddress = new Uri(builder.Configuration.GetValue<string>("DirectoryAPI")!) );
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddScoped<CatalogService>();

@@ -2,15 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using DirectorySite.Models;
+using Microsoft.AspNetCore.Authentication;
 
 namespace DirectorySite.Services
 {
-    public class CatalogService( ILogger<CatalogService> logger,  IHttpClientFactory httpClientFactory )
+    public class CatalogService( ILogger<CatalogService> logger,  IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor )
     {
+        #region Fields
         private readonly ILogger<CatalogService> logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
-        private readonly string authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzIiwiZW1haWwiOiJqdWFuLnJhbmdlbEBmZ2p0YW0uZ29iLm14IiwibmFtZSI6Ikp1YW4gU2FsdmFkb3IgUmFuZ2VsIiwibmJmIjoxNzEwNDM0NDQyLCJleHAiOjE3MTE3MzA0NDIsImlhdCI6MTcxMDQzNDQ0MiwiaXNzIjoiaHR0cHM6Ly9kaXJlY3RvcnlBUEkuZmdqdGFtLmdvYi5teCIsImF1ZCI6Imh0dHBzOi8vZmdqdGFtLmdvYi5teCJ9.TleqLm5O72MZL5cXUu6cy0J4nzJzKbZqlgeqjoHIkR0";
-
+        private readonly IHttpContextAccessor httpContextAccessor = httpContextAccessor;
+        private string AuthToken {
+            get {
+                return httpContextAccessor.HttpContext!.Session.GetString("JWTToken")!;
+            }
+        }
+        #endregion
 
         public async Task<IEnumerable<Occupation>?> GetOccupations()
         {
@@ -21,7 +28,7 @@ namespace DirectorySite.Services
                 RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/occupations"),
                 Method = HttpMethod.Get
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
             var httpResponse = await httpClient.SendAsync( httpRequest );
 
@@ -30,7 +37,7 @@ namespace DirectorySite.Services
                 return data;
             }
 
-            this.logger.LogError("(-) Error at get catalog of occupations " + httpResponse.StatusCode );
+            this.logger.LogError($"(-) Error at get catalog of occupations {httpResponse.StatusCode}\nToken:[{AuthToken}]");
             return null;
         }
 
@@ -43,7 +50,7 @@ namespace DirectorySite.Services
                 RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/genders"),
                 Method = HttpMethod.Get
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
             var httpResponse = await httpClient.SendAsync( httpRequest );
 
@@ -65,7 +72,7 @@ namespace DirectorySite.Services
                 RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/nationalities"),
                 Method = HttpMethod.Get
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
             var httpResponse = await httpClient.SendAsync( httpRequest );
 
@@ -86,7 +93,7 @@ namespace DirectorySite.Services
                 RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/marital-statuses"),
                 Method = HttpMethod.Get
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
             var httpResponse = await httpClient.SendAsync( httpRequest );
 
@@ -108,7 +115,7 @@ namespace DirectorySite.Services
                 RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/contact-types"),
                 Method = HttpMethod.Get
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
             var httpResponse = await httpClient.SendAsync( httpRequest );
 
@@ -130,7 +137,7 @@ namespace DirectorySite.Services
                 RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/countries"),
                 Method = HttpMethod.Get
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
             var httpResponse = await httpClient.SendAsync( httpRequest );
 
@@ -152,7 +159,7 @@ namespace DirectorySite.Services
                 RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/states"),
                 Method = HttpMethod.Get
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
             var httpResponse = await httpClient.SendAsync( httpRequest );
 
@@ -174,7 +181,7 @@ namespace DirectorySite.Services
                 RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/municipalities"),
                 Method = HttpMethod.Get
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
             var httpResponse = await httpClient.SendAsync( httpRequest );
 
