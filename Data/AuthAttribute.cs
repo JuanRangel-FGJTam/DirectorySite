@@ -11,19 +11,18 @@ using Microsoft.Extensions.Options;
 
 namespace DirectorySite.Data
 {
+    [AttributeUsage(AttributeTargets.All)]
     public class AuthAttribute : Attribute, IAuthorizationFilter 
     {  
         
-        private readonly JwtSettings _jwtSettings;
+        private readonly JwtSettings jwtSettings;
 
         public AuthAttribute()
         {
-            // TODO: Inject this settings
-            _jwtSettings =  new JwtSettings(){
-                Issuer="https://directoryAPI.fgjtam.gob.mx",
-                Audience="https://fgjtam.gob.mx",
-                Key="e4b412d9dca447f5a651e0e729c5eeb9"
-            };
+            jwtSettings = StaticSettings
+                .GetConfiguration()
+                .GetSection("JwtSettings")
+                .Get<JwtSettings>()!;
         }
 
         public void OnAuthorization(AuthorizationFilterContext context)
@@ -39,7 +38,7 @@ namespace DirectorySite.Data
 
                 // Validate token
                 try {
-                    context.HttpContext.User = TokenValidator.ValidateToken( token, _jwtSettings );
+                    context.HttpContext.User = TokenValidator.ValidateToken( token, jwtSettings );
                 }
                 catch (Exception ) {
                     context.HttpContext.Response.Redirect("/authentication");
