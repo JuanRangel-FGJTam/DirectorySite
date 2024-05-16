@@ -1,0 +1,10 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    @if(ViewBag.ActivePage != null){
+        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Inicio</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@ViewBag.ActivePage</li>
+    }else{
+        <li class="breadcrumb-item active" aria-current="page">Nombre de la pagina</li>
+    }
+  </ol>
+</nav>
