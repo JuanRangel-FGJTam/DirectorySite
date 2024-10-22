@@ -9,20 +9,19 @@
 
     <div class="row border rounded p-4" style="background-color: whitesmoke;">
     @using( Html.BeginForm("Login", "Authentication", FormMethod.Post )){
-        <!-- Email input -->
-        <div class="form-outline mb-4">
+        <div class="form-outline mb-4 mt-4">
             <input asp-for="Email" class="form-control" />
-            <label asp-for="Email" >Email address</label>
+            <label asp-for="Email" >Correo</label>
         </div>
 
-        <!-- Password input -->
         <div class="form-outline mb-4">
             <input asp-for="Password" class="form-control" />
-            <label asp-for="Password">Password</label>
+            <label asp-for="Password">Contraseña</label>
         </div>
 
-        <!-- Submit button -->
-        <button type="submit" class="btn btn-primary btn-block mb-2 px-5">Sign in</button>
+        <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-primary btn-block mb-2 px-5">Iniciar Sesion</button>
+        </div>
     }
 
     @if( Model is not null){
@@ -32,3 +31,14 @@
     </div>
 
 </div>
+
+<style>
+    body{
+        padding-top: 4rem;
+        background-color: whitesmoke;
+        background-image: url(img/admin-bg-light.png);
+        background-repeat: no-repeat;
+        background-position: top;
+        min-height: 630px;
+    }
+</style>
