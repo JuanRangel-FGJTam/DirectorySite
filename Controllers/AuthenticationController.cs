@@ -27,7 +27,7 @@ namespace DirectorySite.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Login( LoginRequest loginRequest)
+        public ActionResult Login( LoginRequest loginRequest)
         {
             var token = authenticationService.Authenticate( loginRequest, out string errorMessage);
             if( token == null){
@@ -43,6 +43,17 @@ namespace DirectorySite.Controllers
             return RedirectToAction("Index", "Home");
 
         }
-        
+
+        [HttpPost]
+        [Route("logout")]
+        public ActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+
+            // Redirect to a secure page
+            return RedirectToAction("Login");
+
+        }
+
     }
 }

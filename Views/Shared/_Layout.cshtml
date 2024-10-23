@@ -39,12 +39,22 @@
                         </li>
                     </ul>
                 </div>
-
-                <div class="d-flex align-items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="15" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12 4a4 4 0 1 0 0 8a4 4 0 0 0 0-8M6 8a6 6 0 1 1 12 0A6 6 0 0 1 6 8m2 10a3 3 0 0 0-3 3a1 1 0 1 1-2 0a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5a1 1 0 1 1-2 0a3 3 0 0 0-3-3z"/>
-                    </svg>
-                    <div>@ViewBag.UserName</div>
+                
+                @* user profile section *@
+                <div class="dropdown">
+                    <a class="btn dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="15" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12 4a4 4 0 1 0 0 8a4 4 0 0 0 0-8M6 8a6 6 0 1 1 12 0A6 6 0 0 1 6 8m2 10a3 3 0 0 0-3 3a1 1 0 1 1-2 0a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5a1 1 0 1 1-2 0a3 3 0 0 0-3-3z"/>
+                        </svg>
+                        <div>@ViewBag.UserName</div>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            @using(Html.BeginForm("Logout", "Authentication", FormMethod.Post)){
+                                <button class="dropdown-item">Cerrar sesion</button>
+                            }
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
