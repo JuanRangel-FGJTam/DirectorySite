@@ -34,11 +34,14 @@ namespace DirectorySite.Controllers
             };
             httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
-            // Proccess the response
-            var httpResponse = await httpClient.SendAsync( httpRequest );
+            // * attempt to get the sessions
             SessionsResponse? responseData = null;
-            if( httpResponse.IsSuccessStatusCode ){
+            try {
+                var httpResponse = await httpClient.SendAsync( httpRequest );
+                httpResponse.EnsureSuccessStatusCode();
                 responseData = await httpResponse.Content.ReadFromJsonAsync<SessionsResponse>();
+            }catch(Exception err){
+                this._logger.LogError(err,"Fail at retrive the sessions data");
             }
 
             return View( responseData );

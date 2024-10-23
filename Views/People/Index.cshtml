@@ -1,10 +1,16 @@
-﻿@model IEnumerable<DirectorySite.Models.SearchPersonResponse>?
+﻿@using System.Globalization
+@model IEnumerable<DirectorySite.Models.SearchPersonResponse>?
 @{
-    ViewData["Title"] = "Personas";
+    ViewData["Title"] = "Busqueda de personas";
     ViewData["ActivePage"] = "Personas";
 }
 
-<partial name="../Shared/Breadcrumb">
+<div class="d-flex align-items-baseline mb-2">
+  <h1 class="display-6">@ViewBag.Title</h1>
+  <div class="ms-auto">
+    <partial name="../Shared/Breadcrumb">
+  </div>
+</div>
 
 <div class="container">
     <div class="row">
@@ -25,8 +31,8 @@
                 <th scope="col">Nombre completo</th>
                 <th scope="col">Curp</th>
                 <th scope="col">Sexo</th>
-                <th scope="col">Fecha nacimiento</th>
                 <th scope="col">Correo</th>
+                <th scope="col">Fecha nacimiento</th>
                 </tr>
             </thead>
             @if( Model != null && Model.Any() ){
@@ -50,7 +56,7 @@
                                 @if(person.Birthdate == null){
                                     <span></span>
                                 }else{
-                                    <span>@person.Birthdate.Value.ToString("dd MMM yyyy")</span>
+                                    <span class="text-uppercase">@person.Birthdate.Value.ToString("dd MMM yyyy", new CultureInfo("es-MX"))</span>
                                 }
                             </td>
                         </tr>

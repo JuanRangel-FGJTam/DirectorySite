@@ -12,7 +12,12 @@
     }
 }
 
-@Html.Partial("../Shared/Breadcrumb")
+<div class="d-flex align-items-baseline mb-2">
+  <h1 class="display-6">@ViewBag.Title</h1>
+  <div class="ms-auto">
+    <partial name="../Shared/Breadcrumb">
+  </div>
+</div>
 
 <div class="fluid-container ">
     <div class="row align-items-start">
@@ -38,14 +43,24 @@
                             <td scope="row"> @i </td>
                             <td>
                                 <div class="flex flex-column">
-                                    <div class="text-sm">@session.Person.Id</div>
                                     <div class="text-sm">@session.Person.FullName</div>
+                                    <div class="text-secondary" style="font-size: .9rem;">@session.Person!.Id</div>
                                 </div>
                             </td>
                             <td>@session.IpAddress</td>
                             <td>@session.UserAgent</td>
-                            <td>@session.BegginAt</td>
-                            <td>@session.EndAt</td>
+                            <td>
+                                <div class="flex flex-column align-items-center text-center">
+                                    <div class="text-sm text-uppercase">@session.BegginAt!.Value.ToString("dd MMM yyyy")</div>
+                                    <div class="text-sm">@session.BegginAt!.Value.ToString("HH:mm")</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="flex flex-column align-items-center text-center">
+                                    <div class="text-sm text-uppercase">@session.EndAt!.Value.ToString("dd MMM yyyy")</div>
+                                    <div class="text-sm">@session.EndAt!.Value.ToString("HH:mm")</div>
+                                </div>
+                            </td>
                             <td>
                                 <textarea readonly class="rounded-md border-gray-400">@session.Token</textarea>
                             </td>
