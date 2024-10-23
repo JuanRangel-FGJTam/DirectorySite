@@ -33,6 +33,7 @@
                 <th scope="col">Sexo</th>
                 <th scope="col">Correo</th>
                 <th scope="col">Fecha nacimiento</th>
+                <th scope="col">Acciones</th>
                 </tr>
             </thead>
             @if( Model != null && Model.Any() ){
@@ -58,6 +59,9 @@
                                 }else{
                                     <span class="text-uppercase">@person.Birthdate.Value.ToString("dd MMM yyyy", new CultureInfo("es-MX"))</span>
                                 }
+                            </td>
+                            <td>
+                                <a class="btn btn-link" asp-action="Person" asp-controller="People" asp-route-personID="@person.Id" target="_blank">Mostrar</a>
                             </td>
                         </tr>
                         i++;

@@ -1,0 +1,81 @@
+@model PersonResponse
+<div class="container rounded bg-white">
+    <div class="row">
+        <div class="col-md-3 border-right">
+            <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                <img class="rounded-circle mt-5 mb-2" width="150px" src="https://ui-avatars.com/api/?color=333&rounded=true&name=@( Model.FullName!.Replace(" ", "+") )"/>
+                <span class="font-weight-bold">@Model.Name</span>
+                <span class="text-black-50">@Model.PersonId</span>
+            </div>
+        </div>
+        <div class="col-md-5 border-right">
+            <div class="p-3 py-5">
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <label class="labels">Nombre</label>
+                        <input type="text" class="form-control" disabled value="@Model.Name">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="labels">Apellidos</label>
+                        <input type="text" class="form-control" disabled value="@Model.FirstName @Model.LastName">
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <label class="labels">Correo</label>
+                        <input type="text" class="form-control" disabled value="@Model.Email">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="labels">CURP</label>
+                        <input type="text" class="form-control" disabled value="@Model.Curp">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="labels">RFC</label>
+                        <input type="text" class="form-control" disabled value="@Model.Rfc">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="labels">Genero</label>
+                        <input type="text" class="form-control" disabled value="@Model.GenderName">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="labels">Fecha de nacimiento</label>
+                        <input type="text" class="form-control" disabled value="@Model.BirthdateFormated">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="labels">Estado Civil</label>
+                        <input type="text" class="form-control" disabled value="@Model.MaritalStatusName">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="labels">Nacionalidad</label>
+                        <input type="text" class="form-control" disabled value="@Model.NationalityName">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="labels">Ocupacion</label>
+                        <input type="text" class="form-control" disabled value="@Model.OccupationName">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 py-5">
+                <div class="col-md-12">
+                    <label class="labels">Correo</label>
+                    <input type="text" class="form-control" disabled value="@Model.Email">
+                </div>
+                <br>
+                <div class="col-md-12">
+                    <label class="labels">Telefono</label>
+                    <input type="text" class="form-control" disabled value="">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
