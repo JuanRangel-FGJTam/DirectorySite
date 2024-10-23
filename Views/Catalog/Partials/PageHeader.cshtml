@@ -1,13 +1,16 @@
-<div class="text-center">
-    <h1 class="display-5 text-uppercase">Catalogs</h1>
-</div>
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    @if(ViewBag.ActivePage != null){
-        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Catalog">Catalogs</a></li>
+<div class="d-flex align-items-baseline mb-2">
+  
+  <h1 class="display-6">@ViewBag.Title</h1>
+
+  <nav aria-label="breadcrumb" class="ms-auto">
+    <ol class="breadcrumb">
+      @if(ViewBag.ActivePage != null){
+        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Catalog">Catalogos</a></li>
         <li class="breadcrumb-item active" aria-current="page">@ViewBag.ActivePage</li>
-    }else{
+      }else{
         <li class="breadcrumb-item active" aria-current="page">Catalogs</li>
-    }
-  </ol>
-</nav>
+      }
+    </ol>
+  </nav>
+
+</div>

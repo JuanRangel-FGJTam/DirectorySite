@@ -1,18 +1,18 @@
 ﻿@model IEnumerable<DirectorySite.Models.Occupation>?
 @{
-    ViewData["Title"] = "Catalog Page";
-    ViewData["ActivePage"] = "Ocuppations";
+    ViewData["Title"] = "Catalogo - Ocupaciones";
+    ViewData["ActivePage"] = "Ocupaciones";
 }
 
-@Html.Partial("./Partials/PageHeader")
+<partial name="./Partials/PageHeader" />
 
 <div class="fluid-container ">
     <div class="row align-items-start">
         <div class="col-2">
-            @Html.Partial("./Partials/CatalogSidebar")
+            <partial name="./Partials/CatalogSidebar"/>
         </div>
 
-        <div class="col-10">
+        <div class="col-10 border rounded">
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
@@ -31,8 +31,11 @@
                                 <td>@occupation.Id</td>
                                 <td>@occupation.Name</td>
                                 <td>
-                                    <a href="#" class="btn btn-primary btn-sm px-4" tabindex="-1" role="button" aria-disabled="true">Show</a>
-                                    <a href="#" class="btn btn-primary btn-sm px-4" tabindex="-1" role="button" aria-disabled="true">Edit</a>
+                                    <a href="#" class="btn btn-sm" tabindex="-1" role="button" aria-disabled="true">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 1025 1023">
+                                            <path fill="currentColor" d="M896.428 1023h-768q-53 0-90.5-37.5T.428 895V127q0-53 37.5-90t90.5-37h576l-128 127h-384q-27 0-45.5 19t-18.5 45v640q0 27 19 45.5t45 18.5h640q27 0 45.5-18.5t18.5-45.5V447l128-128v576q0 53-37.5 90.5t-90.5 37.5m-576-464l144 144l-208 64zm208 96l-160-159l479-480q17-16 40.5-16t40.5 16l79 80q16 16 16.5 39.5t-16.5 40.5z"/>
+                                        </svg>
+                                    </a>
                                 </td>
                             </tr>
                             i++;
