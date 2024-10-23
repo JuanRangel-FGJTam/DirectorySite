@@ -24,6 +24,7 @@ namespace DirectorySite.Controllers
             return View( );
         }
 
+        [HttpGet]
         [Route("occupations")]
         public async Task<IActionResult> Occupations()
         {
@@ -52,5 +53,17 @@ namespace DirectorySite.Controllers
             return View( data );
         }
 
+
+        [HttpPost]
+        [Route("occupations")]
+        public JsonResult StoreNewOccupation([FromForm] string? name){
+            throw new NotImplementedException();
+            
+            // there is no endpoint on the API for store a new catalog element
+
+            return Json( new {
+                Message = "Elemento registrado " + name
+            });
+        }
     }
 }
