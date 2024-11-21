@@ -14,13 +14,14 @@ namespace DirectorySite.Controllers
 
     [Auth]
     [Route("[controller]")]
-    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService) : Controller
+    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService) : Controller
     {
         private readonly ILogger<PeopleController> _logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
         private readonly IConfiguration configuration = configuration;
         private readonly PeopleSearchService peopleSearchService = _peopleSearchService;
         private readonly PeopleService peopleService = _peopleService;
+        private readonly PeopleSessionService peopleSessionService = _peopleSessionService;
 
         public IActionResult Index()
         {
@@ -60,8 +61,28 @@ namespace DirectorySite.Controllers
             }catch(Exception err){
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
             }
-
             return View(personResponse);
         }
+
+
+        #region PartialViews
+        [HttpGet]
+        [Route("{personID}/sessions")]
+        public async Task<IActionResult> GetSessionPartialView([FromRoute] string personID){
+            SessionsResponse? sessionsData = null;
+            try {
+                sessionsData = await this.peopleSessionService.GetSessionsOfPerson(personID, take:25, skip:0);
+                return PartialView("~/Views/People/Partials/PersonSessions.cshtml", sessionsData);
+            }catch(Exception err){
+                this._logger.LogError(err, "Fail at get the sessions data of the person '{personId}'", personID);
+
+                this._logger.LogError(err, "Fail at get the incident grid data");
+                ViewData["ErrorTitle"] = "Error al obtener las sesiones del usuario";
+                ViewData["ErrorMessage"] = "Hubo un error al obtener las sesiones del usuario, intente de nuevo o comuníquese con un administrador.";
+                return PartialView("~/Views/Shared/ErrorAlert.cshtml", new ErrorViewModel());
+            }
+        }
+        #endregion
+
     }
 }

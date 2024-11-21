@@ -23,6 +23,7 @@ builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddScoped<CatalogService>();
 builder.Services.AddScoped<PeopleSearchService>();
 builder.Services.AddScoped<PeopleService>();
+builder.Services.AddScoped<PeopleSessionService>();
 
 var app = builder.Build();
 
