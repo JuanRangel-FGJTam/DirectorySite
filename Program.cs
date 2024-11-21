@@ -22,6 +22,7 @@ builder.Services.AddHttpClient( "DirectoryAPI", o => o.BaseAddress = new Uri(bui
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddScoped<CatalogService>();
 builder.Services.AddScoped<PeopleSearchService>();
+builder.Services.AddScoped<PeopleService>();
 
 var app = builder.Build();
 
