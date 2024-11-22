@@ -14,12 +14,14 @@ namespace DirectorySite.Controllers
 
     [Auth]
     [Route("[controller]")]
-    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService) : Controller
+    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService) : Controller
     {
         private readonly ILogger<PeopleController> _logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
         private readonly IConfiguration configuration = configuration;
         private readonly PeopleSearchService peopleSearchService = _peopleSearchService;
+        private readonly PeopleService peopleService = _peopleService;
+        private readonly PeopleSessionService peopleSessionService = _peopleSessionService;
 
         public IActionResult Index()
         {
@@ -52,33 +54,35 @@ namespace DirectorySite.Controllers
         [HttpGet]
         [Route("{personID}")]
         public async Task<IActionResult> Person([FromRoute] string personID){
-            
-            // * Prepare the request
-            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
-            var httpRequest = new HttpRequestMessage
-            {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/people/{personID}"),
-                Method = HttpMethod.Get
-            };
-            httpRequest.Headers.Add("Authorization", "Bearer " + HttpContext.Session.GetString("JWTToken"));
-            
-            
             PersonResponse? personResponse = null;
             try {
-                var httpResponse = await httpClient.SendAsync( httpRequest );
-                
-                // * Proccess the response
-                if( httpResponse.IsSuccessStatusCode ){
-                    var text = await httpResponse.Content.ReadAsStringAsync();
-                    this._logger.LogDebug("Response:[{response}]", text);
-                    personResponse = await httpResponse.Content.ReadFromJsonAsync<PersonResponse>();
-                }
+                personResponse = await this.peopleService.GetPersonById(personID);
 
             }catch(Exception err){
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
             }
-
             return View(personResponse);
         }
+
+
+        #region PartialViews
+        [HttpGet]
+        [Route("{personID}/sessions")]
+        public async Task<IActionResult> GetSessionPartialView([FromRoute] string personID){
+            SessionsResponse? sessionsData = null;
+            try {
+                sessionsData = await this.peopleSessionService.GetSessionsOfPerson(personID, take:25, skip:0);
+                return PartialView("~/Views/People/Partials/PersonSessions.cshtml", sessionsData);
+            }catch(Exception err){
+                this._logger.LogError(err, "Fail at get the sessions data of the person '{personId}'", personID);
+
+                this._logger.LogError(err, "Fail at get the incident grid data");
+                ViewData["ErrorTitle"] = "Error al obtener las sesiones del usuario";
+                ViewData["ErrorMessage"] = "Hubo un error al obtener las sesiones del usuario, intente de nuevo o comuníquese con un administrador.";
+                return PartialView("~/Views/Shared/ErrorAlert.cshtml", new ErrorViewModel());
+            }
+        }
+        #endregion
+
     }
 }

@@ -14,7 +14,15 @@
 
 @if(Model != null){
     <partial name="./Partials/PersonProfile.cshtml" />
-
 }else{
     <partial name="./Partials/PersonNotFound.cshtml" />
+}
+
+@section scripts {
+  @if(Model != null){
+    <script>
+      let currentPersonID = '@Html.Raw(Model.PersonId)';
+    </script>
+    <script src="~/js/person/personSessions.js"></script>
+  }
 }

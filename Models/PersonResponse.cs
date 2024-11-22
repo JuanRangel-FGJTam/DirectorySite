@@ -64,6 +64,13 @@ namespace DirectorySite.Models
 
         [JsonPropertyName("birthdateFormated")]
         public string? BirthdateFormated { get; set; }
+
+
+        [JsonPropertyName("address")]
+        public AddressResponse? Address {get;set;}
+
+        [JsonPropertyName("contactInformation")]
+        public IEnumerable<ContactInformationResponse>? ContactInformation {get;set;}
     
     }
 }

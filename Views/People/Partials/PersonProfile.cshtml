@@ -1,81 +1,175 @@
 @model PersonResponse
 <div class="container rounded bg-white">
     <div class="row">
-        <div class="col-md-3 border-right">
+        <!-- Sidebar Picture box -->
+        <div class="col-md-2 border-right">
             <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                <img class="rounded-circle mt-5 mb-2" width="150px" src="https://ui-avatars.com/api/?color=333&rounded=true&name=@( Model.FullName!.Replace(" ", "+") )"/>
-                <span class="font-weight-bold">@Model.Name</span>
+                <img class="rounded-circle mt-5 mb-2" alt="Imagen de perfil" width="150px" src="https://ui-avatars.com/api/?color=333&rounded=true&name=@( Model.FullName!.Replace(" ", "+") )"/>
+                @* <span class="font-weight-bold">@Model.Name</span> *@
                 <span class="text-black-50">@Model.PersonId</span>
             </div>
         </div>
+
         <div class="col-md-5 border-right">
-            <div class="p-3 py-5">
+            <div class="p-3">
+                <div class="mb-2 p-1 border-bottom">
+                    <h4>Datos generales</h4>
+                </div>
                 <div class="row mt-2">
                     <div class="col-md-6">
-                        <label class="labels">Nombre</label>
+                        <label class="label">Nombre</label>
                         <input type="text" class="form-control" disabled value="@Model.Name">
                     </div>
                     
                     <div class="col-md-6">
-                        <label class="labels">Apellidos</label>
+                        <label class="label">Apellidos</label>
                         <input type="text" class="form-control" disabled value="@Model.FirstName @Model.LastName">
                     </div>
-                </div>
-                <div class="row mt-3">
+                    
                     <div class="col-md-12">
-                        <label class="labels">Correo</label>
+                        <label class="label">Correo</label>
                         <input type="text" class="form-control" disabled value="@Model.Email">
                     </div>
 
                     <div class="col-md-12">
-                        <label class="labels">CURP</label>
+                        <label class="label">CURP</label>
                         <input type="text" class="form-control" disabled value="@Model.Curp">
                     </div>
 
                     <div class="col-md-12">
-                        <label class="labels">RFC</label>
+                        <label class="label">RFC</label>
                         <input type="text" class="form-control" disabled value="@Model.Rfc">
                     </div>
 
-                    <div class="col-md-12">
-                        <label class="labels">Genero</label>
+                    <div class="col-md-6">
+                        <label class="label">Genero</label>
                         <input type="text" class="form-control" disabled value="@Model.GenderName">
                     </div>
 
-                    <div class="col-md-12">
-                        <label class="labels">Fecha de nacimiento</label>
+                    <div class="col-md-6">
+                        <label class="label">Fecha de nacimiento</label>
                         <input type="text" class="form-control" disabled value="@Model.BirthdateFormated">
                     </div>
 
-                    <div class="col-md-12">
-                        <label class="labels">Estado Civil</label>
+                    <div class="col-md-6">
+                        <label class="label">Estado Civil</label>
                         <input type="text" class="form-control" disabled value="@Model.MaritalStatusName">
                     </div>
 
-                    <div class="col-md-12">
-                        <label class="labels">Nacionalidad</label>
+                    <div class="col-md-6">
+                        <label class="label">Nacionalidad</label>
                         <input type="text" class="form-control" disabled value="@Model.NationalityName">
                     </div>
 
-                    <div class="col-md-12">
-                        <label class="labels">Ocupacion</label>
+                    <div class="col-md-6">
+                        <label class="label">Ocupacion</label>
                         <input type="text" class="form-control" disabled value="@Model.OccupationName">
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="p-3 py-5">
-                <div class="col-md-12">
-                    <label class="labels">Correo</label>
+
+        <div class="col-md-5">
+
+            <div class="row p-3">
+                <div class="mb-2 p-1 border-bottom">
+                    <h4>Contacto</h4>
+                </div>
+                <div class="mb-2 col-md-12">
+                    <label class="label">Correo principal</label>
                     <input type="text" class="form-control" disabled value="@Model.Email">
                 </div>
                 <br>
-                <div class="col-md-12">
-                    <label class="labels">Telefono</label>
-                    <input type="text" class="form-control" disabled value="">
+                @if(Model.ContactInformation != null)
+                {
+                    foreach(var element in Model.ContactInformation){
+                        <div class="col-md-6">
+                            <label class="label">@element.ContactTypeName</label>
+                            <input type="text" class="form-control" disabled value="@element.Value">
+                        </div>
+                    }
+                }
+
+            </div>
+
+            <div class="row p-3">
+
+                <div class="mb-2 p-1 border-bottom">
+                    <h4>Domicilio</h4>
                 </div>
+                @if(Model.Address == null){
+                    <div class="col-md-12">
+                        <div class="alert alert-warning text-center" role="alert">
+                            Direccion no capturada
+                        </div>
+                    </div>
+                }else {
+                    <div class="col-md-6">
+                        <label class="label">Pais</label>
+                        <input type="text" class="form-control" disabled value="@Model.Address.CountryName">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="label">Estado</label>
+                        <input type="text" class="form-control" disabled value="@Model.Address.StateName">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="label">Ciudad</label>
+                        <input type="text" class="form-control" disabled value="@Model.Address.MunicipalityName">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="label">Codigo Postal</label>
+                        <input type="text" class="form-control" disabled value="@Model.Address.ZipCode">
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label class="label">Colonia</label>
+                        <input type="text" class="form-control" disabled value="@Model.Address.ColonyName">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="label">Calle</label>
+                        <input type="text" class="form-control" disabled value="@Model.Address.Street">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="label">Numero</label>
+                        <input type="text" class="form-control" disabled value="@Model.Address.Number">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="label">Numero Interior</label>
+                        <input type="text" class="form-control" disabled value="@Model.Address.NumberInside">
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4" style="padding-bottom: 4rem;">
+    <div class="row">
+        <div class="col-12">
+            <div class="mb-2 p-1 border-bottom">
+                <h4>Últimas sesiones del usuario</h4>
+            </div>
+        </div>
+        <div id="personSessionsWrapper" class="col-12">
+            <div class="d-flex align-items-center alert alert-primary" role="alert">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="mx-2" style="font-size: 1rem;">Cargando datos</span>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .label {
+        margin-top: .3rem;
+    }
+</style>
