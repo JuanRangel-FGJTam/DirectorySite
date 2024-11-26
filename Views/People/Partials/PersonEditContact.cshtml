@@ -1,0 +1,28 @@
+@model PersonResponse
+<div class="container">
+    <div class="row">
+        <form id="contactForm" class="row my-2" asp-action="UpdateContactInformation" asp-route-personId="@Model.PersonId" method="patch">
+            <div class="mb-2 col-md-12">
+                <label class="label">Correo principal</label>
+                <input type="text" class="form-control" value="@Model.Email">
+            </div>
+
+            @* <div class="mt-2">
+                <button type="submit" class="btn btn-success">Actualizar Correo Principal</button>
+            </div> *@
+        </form>
+    
+        <div class="col-12 my-1"></div>
+
+        @if(Model.ContactInformation != null)
+        {
+            foreach(var element in Model.ContactInformation){
+                <div class="col-md-6">
+                    <label class="label text-capitalize">@element.ContactTypeName?.ToLower()</label>
+                    <input type="text" class="form-control" value="@element.Value">
+                </div>
+            }
+        }
+            
+    </div>
+</div>

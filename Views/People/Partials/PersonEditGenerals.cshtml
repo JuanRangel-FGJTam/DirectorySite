@@ -1,0 +1,60 @@
+@model UpdatePersonGeneralsRequest
+<div class="container">
+    <form id="generalDataForm" class="row my-2" method="patch">
+        <div class="col-md-7">
+            @Html.LabelFor( item => item.Name, new { @class = "label" })
+            @Html.TextBoxFor( item => item.Name, new { @class = "form-control" })
+        </div>
+        
+        <div class="col-md-6">
+            @Html.LabelFor( item => item.FirstName, new { @class = "label" })
+            @Html.TextBoxFor( item => item.FirstName, new { @class = "form-control" })
+        </div>
+
+        <div class="col-md-6">
+            @Html.LabelFor( item => item.LastName, new { @class = "label" })
+            @Html.TextBoxFor( item => item.LastName, new { @class = "form-control" })
+        </div>
+        
+        <div class="col-md-6">
+            @Html.LabelFor( item => item.Curp, new { @class = "label" })
+            @Html.TextBoxFor( item => item.Curp, new { @class = "form-control" })
+        </div>
+
+        <div class="col-md-6">
+            @Html.LabelFor( item => item.Rfc, new { @class = "label" })
+            @Html.TextBoxFor( item => item.Rfc, new { @class = "form-control" })
+        </div>
+
+        <div class="col-md-6">
+            @Html.LabelFor( item => item.GenderId, new { @class = "label" })
+            @Html.DropDownListFor( item => item.GenderId, Model.Genders,"Seleccione un elemento", new { @class = "form-control" } )
+        </div>
+
+        <div class="col-md-6">
+            @Html.LabelFor( item => item.MaritalStatusId, new { @class = "label" })
+            @Html.DropDownListFor( item => item.MaritalStatusId, Model.MaritalStatuses, "Seleccione un elemento", new { @class = "form-control" } )
+        </div>
+
+        <div class="col-md-6">
+            @Html.LabelFor( item => item.NationalityId, new { @class = "label" })
+            @Html.DropDownListFor( item => item.NationalityId, Model.Nationalities, "Seleccione un elemento", new { @class = "form-control" } )
+        </div>
+
+        <div class="col-md-6">
+            @Html.LabelFor( item => item.OccupationId, new { @class = "label" })
+            @Html.DropDownListFor( item => item.OccupationId, Model.Occupations, "Seleccione un elemento", new { @class = "form-control" } )
+        </div>
+
+        <div class="col-md-6">
+            @Html.LabelFor( item => item.Birthdate, new { @class = "label" })
+            @Html.TextBoxFor( item => item.Birthdate, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" } )
+            @Html.ValidationMessageFor(item => item.Birthdate, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success">Actualizar Datos</button>
+        </div>
+
+    </form>
+</div>

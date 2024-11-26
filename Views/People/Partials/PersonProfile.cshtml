@@ -4,15 +4,18 @@
         <!-- Sidebar Picture box -->
         <div class="col-md-2 border-right">
             <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                <img class="rounded-circle mt-5 mb-2" alt="Imagen de perfil" width="150px" src="https://ui-avatars.com/api/?color=333&rounded=true&name=@( Model.FullName!.Replace(" ", "+") )"/>
+                <img class="border rounded-circle mt-5 mb-2" alt="Imagen de perfil" width="150" height="150" src="https://ui-avatars.com/api/?color=333&rounded=true&name=@( Model.FullName!.Replace(" ", "+") )"/>
                 @* <span class="font-weight-bold">@Model.Name</span> *@
-                <span class="text-black-50">@Model.PersonId</span>
+                <span class="text-black-50 text-wrap">@Model.PersonId</span>
+
+                <a ControllerName asp-action="EditPerson" asp-controller="People" asp-route-personID="@Model.PersonId" class="mt-2 btn btn-sm btn-success">Editar datos</a>
+                
             </div>
         </div>
 
         <div class="col-md-5 border-right">
             <div class="p-3">
-                <div class="mb-2 p-1 border-bottom">
+                <div class="mb-2 p-1 border-bottom d-flex">
                     <h4>Datos generales</h4>
                 </div>
                 <div class="row mt-2">
@@ -26,11 +29,6 @@
                         <input type="text" class="form-control" disabled value="@Model.FirstName @Model.LastName">
                     </div>
                     
-                    <div class="col-md-12">
-                        <label class="label">Correo</label>
-                        <input type="text" class="form-control" disabled value="@Model.Email">
-                    </div>
-
                     <div class="col-md-12">
                         <label class="label">CURP</label>
                         <input type="text" class="form-control" disabled value="@Model.Curp">
@@ -79,12 +77,14 @@
                     <label class="label">Correo principal</label>
                     <input type="text" class="form-control" disabled value="@Model.Email">
                 </div>
-                <br>
+
+                <div class="col-12 my-1"></div>
+
                 @if(Model.ContactInformation != null)
                 {
                     foreach(var element in Model.ContactInformation){
                         <div class="col-md-6">
-                            <label class="label">@element.ContactTypeName</label>
+                            <label class="label text-capitalize">@element.ContactTypeName?.ToLower()</label>
                             <input type="text" class="form-control" disabled value="@element.Value">
                         </div>
                     }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ namespace DirectorySite.Controllers
 
     [Auth]
     [Route("[controller]")]
-    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService) : Controller
+    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService, CatalogService _catalogService) : Controller
     {
         private readonly ILogger<PeopleController> _logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
@@ -22,6 +23,7 @@ namespace DirectorySite.Controllers
         private readonly PeopleSearchService peopleSearchService = _peopleSearchService;
         private readonly PeopleService peopleService = _peopleService;
         private readonly PeopleSessionService peopleSessionService = _peopleSessionService;
+        private readonly CatalogService catalogService = _catalogService;
 
         public IActionResult Index()
         {
@@ -55,15 +57,114 @@ namespace DirectorySite.Controllers
         [Route("{personID}")]
         public async Task<IActionResult> Person([FromRoute] string personID){
             PersonResponse? personResponse = null;
-            try {
+            try
+            {
                 personResponse = await this.peopleService.GetPersonById(personID);
-
-            }catch(Exception err){
+            }
+            catch(UnauthorizedAccessException)
+            {
+                return RedirectToAction("Index", "People");
+            }
+            catch(Exception err)
+            {
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
             }
+            
             return View(personResponse);
         }
 
+        [HttpGet]
+        [Route("{personID}/edit")]
+        public async Task<IActionResult> EditPerson([FromRoute] string personID)
+        {
+            PersonResponse? personResponse = null;
+            try
+            {
+                personResponse = await this.peopleService.GetPersonById(personID);
+            }
+            catch(UnauthorizedAccessException)
+            {
+                return RedirectToAction("Index", "People");
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
+                return View("~/Views/Shared/Error.cshtml", new ErrorViewModel
+                {
+                    Message = "Error al obtene los datos del usuario."
+                });
+            }
+            
+            // *  verify if the person is found 
+            if(personResponse == null)
+            {
+                ViewBag.NotFoundMessage = "La persona no se encuntra registrada en el sistema";
+                return View("~/Views/Shared/NotFound.cshtml");
+            }
+
+            // * prepare request models
+            ViewBag.UpdatePersonGeneralsRequest = await InitializedUpdatePersonGeneralsRequest(personResponse);
+
+            // * return the view
+            ViewData["Title"] = $"Editando Persona {personResponse.FullName}";
+            return View("PersonEdit", personResponse);
+
+        }
+
+        [HttpPatch]
+        [Route("{personID}/generals")]
+        public async Task<IActionResult> UpdateGeneralData([FromRoute] string personID, [FromForm] UpdatePersonGeneralsRequest request)
+        {
+
+            // TODO: Validate the request
+
+            // * attempt to get the person
+            PersonResponse? personResponse = null;
+            try
+            {
+                personResponse = await this.peopleService.GetPersonById(personID);
+            }
+            catch(UnauthorizedAccessException)
+            {
+                return RedirectToAction("Index", "People");
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
+                return View("~/Views/Shared/Error.cshtml", new ErrorViewModel
+                {
+                    Message = "Error al obtene los datos del usuario."
+                });
+            }
+
+            // * update the person
+            try
+            {
+                var response = await peopleService.UpdatePerson(personID, request);
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Conflict();
+            }
+            catch (ArgumentException)
+            {
+                return Conflict();
+            }
+            catch (InvalidDataException)
+            {
+                return Conflict();
+            }
+            
+        }
+
+        [HttpPatch]
+        [Route("{personID}/contact")]
+        public IActionResult UpdateContactInformation([FromRoute] string personID)
+        {
+            Console.WriteLine("Updating: " + personID);
+            return Ok();
+        }
 
         #region PartialViews
         [HttpGet]
@@ -82,6 +183,58 @@ namespace DirectorySite.Controllers
                 return PartialView("~/Views/Shared/ErrorAlert.cshtml", new ErrorViewModel());
             }
         }
+        #endregion
+
+        #region private functions
+        private async Task<UpdatePersonGeneralsRequest> InitializedUpdatePersonGeneralsRequest(PersonResponse personResponse){
+
+            // * get the catalogs
+            IEnumerable<Gender>? genders = [];
+            IEnumerable<MaritalStatus>? maritalStatuses = [];
+            IEnumerable<Nationality>? nationalities = [];
+            IEnumerable<Occupation>? occupations = [];
+            var catalogsTask = new List<Task>
+            {
+                Task.Run(async () =>
+                {
+                    genders = await catalogService.GetGenders() ?? [];
+                }),
+                Task.Run(async () =>
+                {
+                    maritalStatuses = await catalogService.GetMaritalStatuses() ?? [];
+                }),
+                Task.Run(async () =>
+                {
+                    nationalities = await catalogService.GetNationalities() ?? [];
+                }),
+                Task.Run(async () =>
+                {
+                    occupations = await catalogService.GetOccupations() ?? [];
+                })
+            };
+            await Task.WhenAll(catalogsTask);
+
+            // * prepare request models
+            var updatePersonGeneralsRequest = new UpdatePersonGeneralsRequest {
+                Name = personResponse.Name,
+                FirstName = personResponse.FirstName,
+                LastName = personResponse.LastName,
+                Curp = personResponse.Curp,
+                Rfc = personResponse.Rfc,
+                Birthdate = personResponse.Birthdate,
+                GenderId = personResponse.GenderId,
+                MaritalStatusId = personResponse.MaritalStatusId,
+                NationalityId = personResponse.NationalityId,
+                OccupationId = personResponse.OccupationId,
+                Genders = genders.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+                MaritalStatuses = maritalStatuses.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+                Nationalities = nationalities.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+                Occupations = occupations.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+            };
+
+            return updatePersonGeneralsRequest;
+        }
+
         #endregion
 
     }
