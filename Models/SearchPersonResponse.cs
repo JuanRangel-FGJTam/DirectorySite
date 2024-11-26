@@ -25,5 +25,8 @@ namespace DirectorySite.Models
 
         [JsonPropertyName("curp")]
         public string? Curp { get; set; }
+
+        [JsonPropertyName("rfc")]
+        public string? Rfc { get; set; }
     }
 }
