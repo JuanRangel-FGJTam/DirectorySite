@@ -32,9 +32,9 @@ function submitContactForm(event){
         title: "No implementado",
         icon: "warning"
     });
-      
+
     // const form = $(this);
-    // const url = form.attr('action');
+    // const url = `/people/${currentPersonID}/contact`;
     // const method = form.attr('method');
     
     // $.ajax({
@@ -42,20 +42,23 @@ function submitContactForm(event){
     //     type: method,
     //     data: form.serialize(),
     //     success: function(response) {
-    //         console.log('Success:', response);
-    //         alert('Contact Data updated successfully!');
+    //         Swal.fire({
+    //             title: "Datos actualizados",
+    //             icon: "success"
+    //         });
     //     },
     //     error: function(xhr, status, error) {
     //         console.error('Error:', error);
-    //         alert('An error occurred. Please try again.');
+    //         Swal.fire({
+    //             title: "Error al actualizar los datos",
+    //             icon: "error"
+    //         });
     //     }
     // });
 }
 
 jQuery(document).ready(function(){
-    
     $('#generalDataForm').on('submit', submitGeneralDataForm);
     
     $('#contactForm').on('submit', submitContactForm);
-
 });

@@ -48,10 +48,10 @@
 
     <div class="tab-content p-3 border">
       <div class="tab-pane fade show active" id="general-data" role="tabpanel" aria-labelledby="general-data-tab">
-        <partial name="./Partials/PersonEditGenerals.cshtml"  model="@ViewBag.UpdatePersonGeneralsRequest"/>
+        <partial name="./Partials/PersonEditGenerals.cshtml" model="@ViewBag.UpdatePersonGeneralsRequest" />
       </div>
       <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-        <partial name="./Partials/PersonEditContact.cshtml" />
+        <partial name="./Partials/PersonEditContact.cshtml" model="@ViewBag.UpdatePersonContactRequest" />
       </div>
       <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
         <partial name="./Partials/PersonEditAddress.cshtml" />

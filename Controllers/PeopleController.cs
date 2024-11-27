@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Mime;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using DirectorySite.Data;
@@ -104,6 +105,7 @@ namespace DirectorySite.Controllers
 
             // * prepare request models
             ViewBag.UpdatePersonGeneralsRequest = await InitializedUpdatePersonGeneralsRequest(personResponse);
+            ViewBag.UpdatePersonContactRequest = await InitializedUpdatePersonContactRequest(personResponse);
 
             // * return the view
             ViewData["Title"] = $"Editando Persona {personResponse.FullName}";
@@ -113,6 +115,8 @@ namespace DirectorySite.Controllers
 
         [HttpPatch]
         [Route("{personID}/generals")]
+        [Consumes(MediaTypeNames.Application.FormUrlEncoded)]
+        [Produces(MediaTypeNames.Application.Json)]
         public async Task<IActionResult> UpdateGeneralData([FromRoute] string personID, [FromForm] UpdatePersonGeneralsRequest request)
         {
 
@@ -126,13 +130,12 @@ namespace DirectorySite.Controllers
             }
             catch(UnauthorizedAccessException)
             {
-                return RedirectToAction("Index", "People");
+                return Unauthorized();
             }
             catch(Exception err)
             {
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
-                return View("~/Views/Shared/Error.cshtml", new ErrorViewModel
-                {
+                return Conflict( new {
                     Message = "Error al obtene los datos del usuario."
                 });
             }
@@ -160,10 +163,48 @@ namespace DirectorySite.Controllers
 
         [HttpPatch]
         [Route("{personID}/contact")]
-        public IActionResult UpdateContactInformation([FromRoute] string personID)
+        [Consumes(MediaTypeNames.Application.FormUrlEncoded)]
+        [Produces(MediaTypeNames.Application.Json)]
+        public async Task<IActionResult> UpdateContactInformation([FromRoute] string personID, [FromForm] UpdatePersonContactRequest request)
         {
-            Console.WriteLine("Updating: " + personID);
-            return Ok();
+            // TODO: Validate the request
+
+            // * attempt to get the person
+            PersonResponse? personResponse = null;
+            try
+            {
+                personResponse = await this.peopleService.GetPersonById(personID);
+            }
+            catch(UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
+                return Conflict( new {
+                    Message = "Error al obtene los datos del usuario."
+                });
+            }
+
+            // * update the contact information of the person
+            try
+            {
+                var response = await peopleService.UpdateContactInformation(personID, request);
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Conflict();
+            }
+            catch (ArgumentException)
+            {
+                return Conflict();
+            }
+            catch (InvalidDataException)
+            {
+                return Conflict();
+            }
         }
 
         #region PartialViews
@@ -230,6 +271,20 @@ namespace DirectorySite.Controllers
                 MaritalStatuses = maritalStatuses.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
                 Nationalities = nationalities.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
                 Occupations = occupations.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+            };
+
+            return updatePersonGeneralsRequest;
+        }
+
+        private async Task<UpdatePersonContactRequest> InitializedUpdatePersonContactRequest(PersonResponse personResponse){
+
+            // * get the catalogs
+            IEnumerable<ContactType>? contactTypes = await catalogService.GetContactTypes() ?? [];
+
+            // * prepare request models
+            var updatePersonGeneralsRequest = new UpdatePersonContactRequest {
+                Email = personResponse.Email,
+                ContactTypes = contactTypes.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
             };
 
             return updatePersonGeneralsRequest;
