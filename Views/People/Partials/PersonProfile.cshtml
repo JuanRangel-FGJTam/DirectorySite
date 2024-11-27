@@ -152,19 +152,35 @@
 
 <div class="container mt-4" style="padding-bottom: 4rem;">
     <div class="row">
-        <div class="col-12">
+
+        <div class="col-sm-12 col-md-6">
             <div class="mb-2 p-1 border-bottom">
                 <h4>Últimas sesiones del usuario</h4>
             </div>
-        </div>
-        <div id="personSessionsWrapper" class="col-12">
-            <div class="d-flex align-items-center alert alert-primary" role="alert">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
+            <div id="personSessionsWrapper">
+                <div class="d-flex align-items-center alert alert-primary mt-3" role="alert">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="mx-2" style="font-size: 1rem;">Cargando datos</span>
                 </div>
-                <span class="mx-2" style="font-size: 1rem;">Cargando datos</span>
             </div>
         </div>
+
+        <div class="col-sm-12 col-md-6">
+            <div class="mb-2 p-1 border-bottom">
+                <h4>Últimos procedimientos del usuario</h4>
+            </div>
+            <div id="personProceduresWrapper">
+                <div class="d-flex align-items-center alert alert-primary mt-3" role="alert">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="mx-2" style="font-size: 1rem;">Cargando datos</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 

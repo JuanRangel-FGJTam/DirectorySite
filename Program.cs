@@ -24,6 +24,7 @@ builder.Services.AddScoped<CatalogService>();
 builder.Services.AddScoped<PeopleSearchService>();
 builder.Services.AddScoped<PeopleService>();
 builder.Services.AddScoped<PeopleSessionService>();
+builder.Services.AddScoped<PeopleProcedureService>();
 
 var app = builder.Build();
 

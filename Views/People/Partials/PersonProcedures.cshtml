@@ -1,0 +1,58 @@
+﻿@model IEnumerable<ProcedureResponse>
+
+<div class="row align-items-start">
+    <div class="col-12">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Procedimiento</th>
+                    <th scope="col">Folio</th>
+                    <th scope="col">Estatus</th>
+                    <th scope="col">Area</th>
+                    <th scope="col" class="text-center">Fecha</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: .9rem;">
+                @{
+                    var i = 1;
+                }
+                @foreach( var pro in Model){
+                    <tr>
+                        <td scope="row">@i</td>
+                        <td>@pro.Name</td>
+                        <td>@pro.Folio</td>
+                        <td>@pro.Status</td>
+                        <td>@pro.Area</td>
+                        <td>
+                            <div class="flex flex-column align-items-center text-center">
+                                @if(pro.CreatedAt == null)
+                                {
+                                    <div class="text-sm text-uppercase">
+                                        * Sin fecha
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-sm text-uppercase">
+                                        @pro.CreatedAt!.Value.ToString("dd MMM yyyy")
+                                        @pro.CreatedAt!.Value.ToString("HH:mm")
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    i++;
+                }
+
+                @if(!Model.Any()){
+                    <tr>
+                        <td colspan="6" scope="row">
+                            No hay registros
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
