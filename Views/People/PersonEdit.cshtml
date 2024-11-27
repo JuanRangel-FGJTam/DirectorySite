@@ -1,0 +1,75 @@
+﻿@using System.Globalization
+@model PersonResponse?
+@{
+  ViewData["ActivePage"] = "Editar Persona";
+}
+
+<div class="d-flex align-items-baseline mb-2">
+  <h1 class="display-6">@ViewBag.Title</h1>
+  <div class="ms-auto">
+    <partial name="../Shared/Breadcrumb" />
+  </div>
+</div>
+
+<div class="container rounded bg-white">
+
+  <div class="row">
+      <div class="col-12 border-right">
+        <div class="d-flex align-items-center text-center p-1">
+            <img class="border rounded-circle" alt="Imagen de perfil" width="80" height="80" src="https://ui-avatars.com/api/?color=333&rounded=true&name=@( Model.FullName!.Replace(" ", "+") )"/>
+            <div class="container d-flex flex-column align-items-start">
+              <span class="text-black-50 text-wrap">@Model.FullName</span>
+              <span class="text-black-50 text-wrap">@Model.PersonId</span>
+            </div>
+        </div>
+      </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active" id="general-data-tab" data-bs-toggle="tab" data-bs-target="#general-data" type="button" role="tab" aria-controls="general-data" aria-selected="true">
+            Datos generales
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">
+            Datos de Contacto
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="address-tab" data-bs-toggle="tab" data-bs-target="#address" type="button" role="tab" aria-controls="address" aria-selected="false">
+            Direccion
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="tab-content p-3 border">
+      <div class="tab-pane fade show active" id="general-data" role="tabpanel" aria-labelledby="general-data-tab">
+        <partial name="./Partials/PersonEditGenerals.cshtml" model="@ViewBag.UpdatePersonGeneralsRequest" />
+      </div>
+      <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+        <partial name="./Partials/PersonEditContact.cshtml" model="@ViewBag.UpdatePersonContactRequest" />
+      </div>
+      <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
+        <partial name="./Partials/PersonEditAddress.cshtml" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .label {
+    margin-top: .3rem;
+  }
+</style>
+
+@section scripts {
+  <script>
+    let currentPersonID = '@Html.Raw(Model.PersonId)';
+  </script>
+  <script src="~/js/person/personEdit.js"></script>
+}

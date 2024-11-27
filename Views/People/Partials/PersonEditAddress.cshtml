@@ -1,0 +1,53 @@
+@model PersonResponse
+<div class="container">
+    <div class="row">
+
+        @if(Model.Address == null){
+            <div class="col-md-12">
+                <div class="alert alert-warning text-center" role="alert">
+                    Direccion no capturada
+                </div>
+            </div>
+        }else {
+            <div class="col-md-6">
+                <label class="label">Pais</label>
+                <input type="text" class="form-control" disabled value="@Model.Address.CountryName">
+            </div>
+
+            <div class="col-md-6">
+                <label class="label">Estado</label>
+                <input type="text" class="form-control" disabled value="@Model.Address.StateName">
+            </div>
+
+            <div class="col-md-6">
+                <label class="label">Ciudad</label>
+                <input type="text" class="form-control" disabled value="@Model.Address.MunicipalityName">
+            </div>
+
+            <div class="col-md-6">
+                <label class="label">Codigo Postal</label>
+                <input type="text" class="form-control" disabled value="@Model.Address.ZipCode">
+            </div>
+            
+            <div class="col-md-12">
+                <label class="label">Colonia</label>
+                <input type="text" class="form-control" disabled value="@Model.Address.ColonyName">
+            </div>
+
+            <div class="col-md-12">
+                <label class="label">Calle</label>
+                <input type="text" class="form-control" disabled value="@Model.Address.Street">
+            </div>
+
+            <div class="col-md-6">
+                <label class="label">Numero</label>
+                <input type="text" class="form-control" disabled value="@Model.Address.Number">
+            </div>
+
+            <div class="col-md-6">
+                <label class="label">Numero Interior</label>
+                <input type="text" class="form-control" disabled value="@Model.Address.NumberInside">
+            </div>
+        }
+    </div>
+</div>
