@@ -14,7 +14,7 @@ namespace DirectorySite.Controllers
 
     [Auth]
     [Route("[controller]")]
-    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService) : Controller
+    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService, PeopleProcedureService _peopleProcedureService ) : Controller
     {
         private readonly ILogger<PeopleController> _logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
@@ -22,6 +22,7 @@ namespace DirectorySite.Controllers
         private readonly PeopleSearchService peopleSearchService = _peopleSearchService;
         private readonly PeopleService peopleService = _peopleService;
         private readonly PeopleSessionService peopleSessionService = _peopleSessionService;
+        private readonly PeopleProcedureService peopleProcedureService = _peopleProcedureService;
 
         public IActionResult Index()
         {
@@ -70,15 +71,34 @@ namespace DirectorySite.Controllers
         [Route("{personID}/sessions")]
         public async Task<IActionResult> GetSessionPartialView([FromRoute] string personID){
             SessionsResponse? sessionsData = null;
-            try {
-                sessionsData = await this.peopleSessionService.GetSessionsOfPerson(personID, take:25, skip:0);
+            try
+            {
+                sessionsData = await this.peopleSessionService.GetSessionsOfPerson(personID, take:5, skip:0);
                 return PartialView("~/Views/People/Partials/PersonSessions.cshtml", sessionsData);
-            }catch(Exception err){
+            }
+            catch(Exception err)
+            {
                 this._logger.LogError(err, "Fail at get the sessions data of the person '{personId}'", personID);
-
-                this._logger.LogError(err, "Fail at get the incident grid data");
                 ViewData["ErrorTitle"] = "Error al obtener las sesiones del usuario";
                 ViewData["ErrorMessage"] = "Hubo un error al obtener las sesiones del usuario, intente de nuevo o comuníquese con un administrador.";
+                return PartialView("~/Views/Shared/ErrorAlert.cshtml", new ErrorViewModel());
+            }
+        }
+
+        [HttpGet]
+        [Route("{personID}/procedures")]
+        public async Task<IActionResult> GetProceduresPartialView([FromRoute] string personID){
+            IEnumerable<ProcedureResponse> procedureResponses = [];
+            try
+            {
+                procedureResponses = await this.peopleProcedureService.GetProceduresOfPerson(personID, take:5, skip:0);
+                return PartialView("~/Views/People/Partials/PersonProcedures.cshtml", procedureResponses);
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the procedures data of the person '{personId}'", personID);
+                ViewData["ErrorTitle"] = "Error al obtener los procedimientos del usuario";
+                ViewData["ErrorMessage"] = "Hubo un error al obtener las procedimientos del usuario, intente de nuevo o comuníquese con un administrador.";
                 return PartialView("~/Views/Shared/ErrorAlert.cshtml", new ErrorViewModel());
             }
         }
