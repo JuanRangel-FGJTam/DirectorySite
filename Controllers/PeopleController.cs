@@ -16,7 +16,7 @@ namespace DirectorySite.Controllers
 
     [Auth]
     [Route("[controller]")]
-    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService, PeopleProcedureService _peopleProcedureService ) : Controller
+    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService, PeopleProcedureService _peopleProcedureService, CatalogService _catalogService) : Controller
     {
         private readonly ILogger<PeopleController> _logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
