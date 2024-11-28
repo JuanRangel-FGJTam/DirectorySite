@@ -1,10 +1,33 @@
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    @if(ViewBag.ActivePage != null){
-        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Inicio</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@ViewBag.ActivePage</li>
-    }else{
-        <li class="breadcrumb-item active" aria-current="page">Nombre de la pagina</li>
+    @if(ViewBag.ActivePage != null)
+    {
+      <li class="breadcrumb-item">
+        <a asp-action="Index" asp-controller="Home">Inicio</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">@ViewBag.ActivePage</li>
+    }
+    else if (ViewBag.BreadcrumbPages != null)
+    {
+      <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Inicio</a></li>
+      @foreach( var breadcrumbPage in ViewBag.BreadcrumbPages )
+      {
+        <li class="breadcrumb-item" aria-current="page">
+          @if(breadcrumbPage["Active"] == true)
+          {
+            <li class="breadcrumb-item active" aria-current="page">@breadcrumbPage["Title"]</li>
+          }else
+          {
+            <li class="breadcrumb-item">
+              <a asp-action="@breadcrumbPage["Action"]" asp-controller="@breadcrumbPage["ControllerName"]">@breadcrumbPage["Title"]</a>
+            </li>
+          }
+        </li>
+      }
+    }
+    else
+    {
+      <li class="breadcrumb-item active" aria-current="page">Nombre de la pagina</li>
     }
   </ol>
 </nav>

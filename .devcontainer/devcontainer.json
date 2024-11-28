@@ -2,9 +2,10 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
 	"name": "C# (.NET)",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0"
-
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0",
+	"runArgs": [
+		"--env", "TZ=America/Monterrey"
+	]
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 

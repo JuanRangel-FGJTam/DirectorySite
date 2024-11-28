@@ -1,0 +1,82 @@
+﻿@model PreregisterResponse?
+@{
+    ViewData["Title"] = Model!=null ?"Preregistro " + Model.Id :"Registro no encontrado";
+    ViewData["ActivePage"] = "Preregistros";
+}
+
+<div class="d-flex align-items-baseline mb-2">
+  <h1 class="display-6">@ViewBag.Title</h1>
+  <div class="ms-auto">
+    <partial name="../Shared/Breadcrumb">
+  </div>
+</div>
+
+@if(Model == null)
+{
+  <div class="container rounded bg-white">
+    <div class="row">
+      <partial name="~/Views/Shared/ErrorAlert.cshtml"/>
+    </div>
+  </div>
+}
+else
+{
+  <div class="container rounded bg-white">
+    <div class="row">
+
+      <div class="col-12 mb-2 p-1 border-bottom">
+          <h4>Datos generales</h4>
+      </div>
+
+      <div class="col-md-6">
+        <label class="label">Correo</label>
+        <input type="text" class="form-control" disabled value="@Model.Mail">
+      </div>
+
+      <div class="col-md-6">
+        <label class="label">Fecha Registro</label>
+        <input type="text" class="form-control" disabled value="@Model.CreatedAt">
+      </div>
+
+      <div class="col-md-6">
+        <label class="label">Ultima Actualizacion</label>
+        <input type="text" class="form-control" disabled value="@Model.UpdatedAt">
+      </div>
+
+      <div class="col-md-6">
+        <label class="label">Válido Hasta</label>
+        <input type="text" class="form-control" disabled value="@Model.ValidTo">
+      </div>
+
+      <div class="col-12">
+        <label class="label">Token</label>
+        <textarea type="text" class="form-control" rows="3" disabled>@Model.Token</textarea>
+      </div>
+
+    </div>
+
+    <div class="row mt-4">
+
+      <div class="col-12">
+        <div class="border border-danger rounded shadow-sm d-flex p-4">
+          <div>
+            <p>
+              <strong>Eliminar Registro</strong>
+              <br/>
+              Eliminar registro del sistema, esta es una accion irreversible.
+            </p>
+            
+          </div>
+          <button class="btn btn-danger disabled ms-auto" style="width: 12rem;" type="button">Eliminar Registro</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+}
+
+<style>
+  .label {
+      margin-top: .3rem;
+  }
+</style>

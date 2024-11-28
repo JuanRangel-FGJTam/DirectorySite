@@ -1,0 +1,40 @@
+﻿@model IEnumerable<DirectorySite.Models.PreregisterResponse>
+@{
+    ViewData["Title"] = "Preregistros";
+    ViewData["ActivePage"] = "Preregistros";
+}
+
+<div class="d-flex align-items-baseline mb-2">
+    <h1 class="display-6 d-flex align-items-baseline">
+        @ViewBag.Title
+        <span id="lastUpdateLabel" class="pl-2 ps-2 pt-2 fw-bold" style="font-size: 12px;">@ViewBag.LastUpdate</span>
+    </h1>
+  <div class="ms-auto">
+    <partial name="../Shared/Breadcrumb">
+  </div>
+</div>
+
+<div class="fluid-container ">
+
+    <div class="row">
+        <div class="col-12">
+            <button id="updateRecordsButton" class="btn btn-primary btn-sm" type="button">Actualizar</button>
+        </div>
+    </div>
+
+    <div class="row align-items-start">
+        <div id="tableWrapper" class="col-12">
+            @* <partial name="partials/RecordsTable.cshtml" model="@Model"/> *@
+            <div class="d-flex align-items-center alert alert-primary mt-3" role="alert">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="mx-2" style="font-size: 1rem;">Cargando datos</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/js/preregisters/index.js"></script>
+}
