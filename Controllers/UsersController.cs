@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
+using Microsoft.Extensions.Logging;
 using DirectorySite.Data;
 using DirectorySite.Models;
 using DirectorySite.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using DirectorySite.Exceptions;
 
 namespace DirectorySite.Controllers
 {
@@ -78,6 +81,155 @@ namespace DirectorySite.Controllers
             // return the view
             ViewData["Title"] = $"Usuario {userData!.FirstName?.ToLower()} {userData!.LastName?.ToLower()}";
             return View(userData);
+        }
+
+        [Route("{userId}/edit")]
+        public async Task<IActionResult> EditUser([FromRoute] int userId)
+        {
+            UserResponse? userData = null;
+            try
+            {
+                userData = await userService.GetUserData(userId);
+            }
+            catch (UnauthorizedAccessException uae)
+            {
+                this._logger.LogDebug(uae.Message);
+                throw;
+            }
+            catch (Exception err)
+            {
+                this._logger.LogDebug(err.Message);
+                throw;
+            }
+
+            // verify if the user is null
+            if(userData == null)
+            {
+                ViewBag.NotFoundMessage = "El usuario no se encuntra registrada en el sistema";
+                return View("~/Views/Shared/NotFound.cshtml");
+            }
+
+            // prepare the updateRequest models
+            ViewBag.UserUpdateGeneralsRequest = new UserUpdateGeneralsRequest {
+                FirstName = userData.FirstName?.Trim(),
+                LastName = userData.LastName?.Trim(),
+                Email = userData.Email?.Trim(),
+            };
+            ViewBag.UserUpdateCredentialsRequest = new UserUpdateCredentialsRequest();
+            
+            // return the view
+            ViewData["Title"] = $"Editando {userData!.FirstName?.ToLower()} {userData!.LastName?.ToLower()}";
+            return View(userData);
+        }
+
+
+        [HttpPatch]
+        [Route("{userId}/generals")]
+        [Consumes(MediaTypeNames.Application.FormUrlEncoded)]
+        [Produces(MediaTypeNames.Application.Json)]
+        public async Task<IActionResult> UpdateGeneralData([FromRoute] int userId, [FromForm] UserUpdateGeneralsRequest request)
+        {
+            // TODO: Validate the request
+
+            // * attempt to get the user data
+            UserResponse? userData = null;
+            try
+            {
+                userData = await userService.GetUserData(userId);
+            }
+            catch(UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the data of the user '{personId}'", userId);
+                return Conflict( new {
+                    Message = "Error al obtene los datos del usuario."
+                });
+            }
+
+            // * update the person
+            try
+            {
+                var response = await userService.UpdateUserGenerals(userId, request);
+                if(response == 1)
+                {
+                    return Ok();
+                }else
+                {
+                    return Conflict();
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Conflict();
+            }
+            catch (ArgumentException)
+            {
+                return Conflict();
+            }
+            catch (InvalidDataException)
+            {
+                return Conflict();
+            }
+            
+        }
+
+
+        [HttpPatch]
+        [Route("{userId}/credentials")]
+        [Consumes(MediaTypeNames.Application.FormUrlEncoded)]
+        [Produces(MediaTypeNames.Application.Json)]
+        public async Task<IActionResult> UpdateCredentials([FromRoute] int userId, [FromForm] UserUpdateCredentialsRequest request)
+        {
+            // TODO: Validate the request
+            
+            // * attempt to get the user data
+            UserResponse? userData = null;
+            try
+            {
+                userData = await userService.GetUserData(userId);
+            }
+            catch(UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the data of the user '{personId}'", userId);
+                return Conflict( new {
+                    Message = "Error al obtene los datos del usuario."
+                });
+            }
+
+
+            // * update the person
+            try
+            {
+                var response = await userService.UpdateCredentials(userId, request);
+                if(response == 1)
+                {
+                    return Ok();
+                }else
+                {
+                    return Conflict();
+                }
+            }
+            catch(ArgumentException ve)
+            {
+                return UnprocessableEntity( new {
+                    ve.Message
+                });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Conflict();
+            }
+            catch (Exception)
+            {
+                return Conflict();
+            }
         }
 
     }

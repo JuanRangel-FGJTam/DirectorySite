@@ -30,7 +30,7 @@ else
             <img class="border rounded-circle mt-5 mb-2" alt="Imagen de perfil" width="150" height="150" src="https://ui-avatars.com/api/?color=333&rounded=true&name=@( Model.FullName!.Replace(" ", "+") )" />
             <span class="text-black-50 text-wrap" style="font-size: 10px;">@Model.Email</span>
             <span class="text-black-50 text-wrap" style="font-size: 10px;">@Model.Id</span>
-            <a ControllerName asp-action="EditPerson" asp-controller="People" asp-route-personID="@Model.Id" class="mt-2 btn btn-sm btn-success">Editar datos</a>
+            <a ControllerName asp-action="EditUser" asp-controller="Users" asp-route-userId="@Model.Id" class="mt-2 btn btn-sm btn-success">Editar datos</a>
         </div>
       </div>
 

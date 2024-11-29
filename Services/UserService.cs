@@ -1,11 +1,15 @@
 using System;
+using System.Data;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Newtonsoft.Json;
 using DirectorySite.Models;
+using DirectorySite.Exceptions;
 
 
 namespace DirectorySite.Services
@@ -15,6 +19,12 @@ namespace DirectorySite.Services
         private readonly ILogger<UserService> logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
         private readonly IHttpContextAccessor httpContextAccessor = httpContextAccessor;
+        private string authToken = string.Empty;
+
+        private readonly JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore
+        };
 
         /// <summary>
         /// get active users
@@ -23,16 +33,7 @@ namespace DirectorySite.Services
         /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token</exception>
         public async Task<IEnumerable<UserResponse>?> GetUsers()
         {
-            string authToken = string.Empty;
-            try
-            {
-                authToken = httpContextAccessor.HttpContext!.Session.GetString("JWTToken")!;
-            }
-            catch(Exception ex)
-            {
-                logger.LogError(ex, "Error at attempting to retrive the auth token: {message}", ex.Message);
-                throw new UnauthorizedAccessException();
-            }
+            LoadAuthToken();
 
             // * prepare the request
             using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
@@ -82,6 +83,126 @@ namespace DirectorySite.Services
             }
             return users.FirstOrDefault(item => item.Id == userId);
         }
-    
+
+        /// <summary>
+        /// get the data of the user by id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token</exception>
+        public async Task<int> UpdateUserGenerals(int userId, UserUpdateGeneralsRequest request)
+        {
+            LoadAuthToken();
+
+            // * prepare the payload
+            var payload = JsonConvert.SerializeObject(request, jsonSerializerSettings);
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/user/{userId}"),
+                Method = HttpMethod.Put,
+                Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+
+            // * send the request
+            try
+            {
+                var httpResponse = await httpClient.SendAsync(httpRequest);
+                httpResponse.EnsureSuccessStatusCode();
+                // * process the response
+                var text = await httpResponse.Content.ReadAsStringAsync();
+                this.logger.LogDebug("Response:[{response}]", text);
+                return 1;
+            }
+            catch(HttpRequestException httpex)
+            {
+                // TODO: Validate the http status code
+                this.logger.LogError(httpex, "Fail at attempt to update the user: {message}", httpex.Message);
+                return 0;
+            }
+            catch(Exception err)
+            {
+                this.logger.LogError(err, "Fail at attempt to update the user: {message}", err.Message);
+                return 0;
+            }
+
+        }
+
+        /// <summary>
+        /// get the data of the user by id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token</exception>
+        /// <exception cref="ArgumentException">Some validations fails</exception>
+        public async Task<int> UpdateCredentials(int userId, UserUpdateCredentialsRequest request)
+        {
+            LoadAuthToken();
+
+            // * prepare the payload
+            var payload = JsonConvert.SerializeObject(request, jsonSerializerSettings);
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/user/{userId}"),
+                Method = HttpMethod.Put,
+                Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+
+            // * send the request
+            try
+            {
+                var httpResponse = await httpClient.SendAsync(httpRequest);
+                httpResponse.EnsureSuccessStatusCode();
+                // * process the response
+                var text = await httpResponse.Content.ReadAsStringAsync();
+                this.logger.LogDebug("Response:[{response}]", text);
+                return 1;
+            }
+            catch(HttpRequestException httpex)
+            {
+                if(httpex.StatusCode == System.Net.HttpStatusCode.UnprocessableContent)
+                {
+                    throw new ArgumentException("Las contraseñas no coinciden");
+                }
+
+                // TODO: Validate the http status code
+                this.logger.LogError(httpex, "Fail at attempt to update the user: {message}", httpex.Message);
+                return 0;
+            }
+            catch(Exception err)
+            {
+                this.logger.LogError(err, "Fail at attempt to update the user: {message}", err.Message);
+                return 0;
+            }
+
+        }
+
+        #region private methods
+
+        /// <summary>
+        /// load the auth token
+        /// </summary>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        private void LoadAuthToken()
+        {
+            try
+            {
+                authToken = httpContextAccessor.HttpContext!.Session.GetString("JWTToken")!;
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "Error at attempting to retrive the auth token: {message}", ex.Message);
+                throw new UnauthorizedAccessException();
+            }
+        }
+
+        #endregion
     }
 }
