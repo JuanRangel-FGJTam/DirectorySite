@@ -1,0 +1,89 @@
+﻿@using System.Globalization
+@model UserResponse?
+@{
+  ViewData["ActivePage"] = "Personas";
+}
+
+<div class="d-flex align-items-baseline mb-2">
+  <h1 class="display-6 text-capitalize" style="font-size: 1.4rem;">@ViewBag.Title</h1>
+  <div class="ms-auto">
+    <partial name="../Shared/Breadcrumb">
+  </div>
+</div>
+
+@if(Model == null)
+{
+  <div class="container">
+      <div class="row">
+          <div class="alert alert-warning my-4" role="alert">
+            El usuario no se encuentra registrada en el sistema.
+          </div>
+      </div>
+  </div>
+}
+else
+{
+  <div class="container rounded bg-white">
+    <div class="row">
+      <div class="col-md-2 border-right">
+        <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+            <img class="border rounded-circle mt-5 mb-2" alt="Imagen de perfil" width="150" height="150" src="https://ui-avatars.com/api/?color=333&rounded=true&name=@( Model.FullName!.Replace(" ", "+") )" />
+            <span class="text-black-50 text-wrap" style="font-size: 10px;">@Model.Email</span>
+            <span class="text-black-50 text-wrap" style="font-size: 10px;">@Model.Id</span>
+            <a ControllerName asp-action="EditPerson" asp-controller="People" asp-route-personID="@Model.Id" class="mt-2 btn btn-sm btn-success">Editar datos</a>
+        </div>
+      </div>
+
+      <div class="col-md-8 border-right">
+        <div class="p-3">
+          <div class="mb-2 p-1 border-bottom d-flex">
+              <h4>Datos generales</h4>
+          </div>
+          <div class="row mt-2">
+
+            <div class="col-md-6">
+              <label class="label">Nombre</label>
+              <input type="text" class="form-control" disabled value="@Model.FirstName" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="label">Apellidos</label>
+              <input type="text" class="form-control" disabled value="@Model.LastName" />
+            </div>
+            
+            <div class="col-md-6">
+              <label class="label">Correo</label>
+              <input type="text" class="form-control" disabled value="@Model.Email" />
+            </div>
+
+            <div class="col-12 mt-2">
+              <label class="label">Roles</label>
+              <div class="roles-div d-flex p-2">
+                <span class="badge rounded-pill bg-primary text-bg-primary">Sample Rol 1</span>
+                <span class="badge rounded-pill bg-primary text-bg-primary">Sample Rol 2</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-2">
+        <div class="row p-3" />
+      </div>
+
+    </div>
+  </div>
+
+}
+
+<style>
+  .label {
+    margin-top: .3rem;
+  }
+  .roles-div .badge
+  {
+    padding: .25rem 1rem;
+    margin: 0rem .2rem;
+  }
+</style>
