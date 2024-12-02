@@ -16,6 +16,7 @@ namespace DirectorySite.Controllers
 {
 
     [Auth]
+    [Admin]
     [Route("[controller]")]
     public class UsersController(ILogger<UsersController> logger, UserService us, CatalogService cs) : Controller
     {
