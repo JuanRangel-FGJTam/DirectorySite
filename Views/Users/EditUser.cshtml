@@ -26,23 +26,8 @@
   </div>
 
   <partial name="partials/EditGenerals.cshtml" model="@ViewBag.UserUpdateGeneralsRequest"/>
-
-  <form class="row mt-4 border rounded p-4 bg-light">
-    <div class="col-12 mb-2 p-1 border-bottom d-flex">
-      <h4 class="fs-5">Roles del usuario</h4>
-    </div>
-
-    <div class="col-6">
-      <label class="label">Roles Activos</label>
-      <input type="text" class="form-control"/>
-    </div>
-
-    <div class="col-6">
-      <label class="label">Roles Disponibles</label>
-      <input type="text" class="form-control"/>
-    </div>
-
-  </form>
+  
+  <partial name="partials/EditRoles.cshtml" model="@ViewBag.UpdateRolesRequest"/>
 
   <partial name="partials/EditCredentials.cshtml" model="@ViewBag.UserUpdateCredentialsRequest" />
 

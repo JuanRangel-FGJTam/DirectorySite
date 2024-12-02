@@ -3,6 +3,21 @@
 @{
   ViewData["ActivePage"] = "Personas";
 }
+@functions {
+  string GetRoleName(int roleId)
+  {
+    IEnumerable<Role> _roles = (IEnumerable<Role>) ViewBag.Roles ?? [];
+      try
+      {
+        return _roles.FirstOrDefault(item => item.Id == roleId)!.Name;
+
+      }
+      catch(Exception)
+      {
+        return "R" + roleId;
+      }
+  }
+}
 
 <div class="d-flex align-items-baseline mb-2">
   <h1 class="display-6 text-capitalize" style="font-size: 1.4rem;">@ViewBag.Title</h1>
@@ -57,11 +72,22 @@ else
             </div>
 
             <div class="col-12 mt-2">
-              <label class="label">Roles</label>
-              <div class="roles-div d-flex p-2">
-                <span class="badge rounded-pill bg-primary text-bg-primary">Sample Rol 1</span>
-                <span class="badge rounded-pill bg-primary text-bg-primary">Sample Rol 2</span>
-              </div>
+              <label class="label">Roles del usuario</label>
+              @if(Model.UserRoles != null && Model.UserRoles.Any())
+              {
+                <div class="roles-div d-flex p-2">
+                @foreach(var item in Model.UserRoles)
+                {
+                    <span class="badge rounded-pill bg-primary text-bg-primary">@GetRoleName(item.RoleId)</span>
+                }
+                </div>
+              }
+              else
+              {
+                <div class="alert alert-warning p-2" role="alert">
+                  El usuario no tiene roles
+                </div>
+              }
             </div>
 
           </div>

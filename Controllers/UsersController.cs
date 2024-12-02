@@ -17,10 +17,11 @@ namespace DirectorySite.Controllers
 
     [Auth]
     [Route("[controller]")]
-    public class UsersController(ILogger<UsersController> logger, UserService us) : Controller
+    public class UsersController(ILogger<UsersController> logger, UserService us, CatalogService cs) : Controller
     {
         private readonly ILogger<UsersController> _logger = logger;
         private readonly UserService userService = us;
+        private readonly CatalogService catalogService = cs;
         
         public async Task<IActionResult> Index()
         {
@@ -78,6 +79,8 @@ namespace DirectorySite.Controllers
                 return View("~/Views/Shared/NotFound.cshtml");   
             }
             
+            ViewBag.Roles = await catalogService.GetRoles();
+            
             // return the view
             ViewData["Title"] = $"Usuario {userData!.FirstName?.ToLower()} {userData!.LastName?.ToLower()}";
             return View(userData);
@@ -102,6 +105,8 @@ namespace DirectorySite.Controllers
                 throw;
             }
 
+            var rolesAvaliables = await this.catalogService.GetRoles();
+
             // verify if the user is null
             if(userData == null)
             {
@@ -116,6 +121,10 @@ namespace DirectorySite.Controllers
                 Email = userData.Email?.Trim(),
             };
             ViewBag.UserUpdateCredentialsRequest = new UserUpdateCredentialsRequest();
+            ViewBag.UpdateRolesRequest = new UpdateRolesRequest {
+                Roles = (userData.UserRoles??[]).Select( item => item.RoleId).ToList(),
+                RolesAvailables = rolesAvaliables!.Select( item => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(item.Name, item.Id.ToString()))
+            };
             
             // return the view
             ViewData["Title"] = $"Editando {userData!.FirstName?.ToLower()} {userData!.LastName?.ToLower()}";
@@ -231,6 +240,53 @@ namespace DirectorySite.Controllers
                 return Conflict();
             }
         }
+
+        [HttpPatch]
+        [Route("{userId}/roles")]
+        [Produces(MediaTypeNames.Application.Json)]
+        public async Task<IActionResult> UpdateUserRoles([FromRoute] int userId, [FromForm] int roleId, [FromForm] int value)
+        {
+            // * attempt to get the user data
+            UserResponse? userData = null;
+            try
+            {
+                userData = await userService.GetUserData(userId);
+            }
+            catch(UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the data of the user '{personId}'", userId);
+                return Conflict( new {
+                    Message = "Error al obtene los datos del usuario."
+                });
+            }
+            
+            this._logger.LogInformation("{role} a {value}", roleId, value);
+            // * update the person
+            try
+            {
+                var response = await userService.AttachRole(userId, roleId, value == 1);
+                if(response == 1)
+                {
+                    return Ok();
+                }else
+                {
+                    return Conflict();
+                }
+            }
+            catch (UnauthorizedAccessException ua)
+            {
+                return Conflict(ua.Message);
+            }
+            catch (Exception err)
+            {
+                return Conflict(err.Message);
+            }
+        }
+
 
         [HttpGet("/new")]
         public IActionResult NewUser()

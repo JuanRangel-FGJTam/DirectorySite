@@ -185,6 +185,42 @@ namespace DirectorySite.Services
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="roleId"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token</exception>
+        /// <exception cref="ArgumentException">Some validations fails</exception>
+        public async Task<int> AttachRole(int userId, int roleId, bool assigned)
+        {
+            LoadAuthToken();
+
+            // * prepare the payload
+            var payload = JsonConvert.SerializeObject(new {roleId}, jsonSerializerSettings);
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/user/{userId}/role"),
+                Method = assigned ? HttpMethod.Put : HttpMethod.Delete,
+                Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+
+            // * send the request
+            
+            var httpResponse = await httpClient.SendAsync(httpRequest);
+            httpResponse.EnsureSuccessStatusCode();
+            // * process the response
+            var text = await httpResponse.Content.ReadAsStringAsync();
+            this.logger.LogDebug("Response:[{response}]", text);
+            return 1;
+        }
+
 
         /// <summary>
         /// </summary>

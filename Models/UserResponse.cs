@@ -21,7 +21,7 @@ public class UserResponse
     public bool IsActive { get; set; }
 
     [JsonPropertyName("userRoles")]
-    public IEnumerable<object>? UserRoles { get; set; }
+    public IEnumerable<UserRole>? UserRoles { get; set; }
 
     [JsonPropertyName("userClaims")]
     public IEnumerable<object>? UserClaims { get; set; }
@@ -30,4 +30,19 @@ public class UserResponse
     {
         get => string.Join(" ", FirstName, LastName);
     }
+}
+
+public class UserRole
+{
+    [JsonPropertyName("key")]
+    public Guid Key { get; set; }
+
+    [JsonPropertyName("userId")]
+    public int UserId { get; set; }
+    
+    [JsonPropertyName("roleId")]
+    public int RoleId { get; set; }
+    
+    [JsonPropertyName("role")]
+    public Role? Role{ get; set; }
 }
