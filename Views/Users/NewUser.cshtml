@@ -1,0 +1,56 @@
+﻿@model NewUserRequest
+@{
+  ViewData["ActivePage"] = "Registrar Usuario";
+}
+
+<div class="d-flex align-items-baseline mb-2">
+  <h1 class="display-6">@ViewBag.Title</h1>
+  <div class="ms-auto">
+    <partial name="../Shared/Breadcrumb" />
+  </div>
+</div>
+
+<div class="container rounded bg-white" style="max-width: 900px;">
+  <div class="row">
+    <form asp-action="StoreUser" asp-controller="Users" method="post" class="row mt-4 border rounded p-4 bg-light">
+      
+      <!-- Display validation errors -->
+      @if(!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+      {
+        <div class="col-12">
+          <partial name="~/Views/Shared/ErrorAlert.cshtml" />
+        </div>
+      }
+      
+      <div class="col-7 mt-2">
+        @Html.LabelFor( item => item.Email, new { @class = "label" })
+        @Html.TextBoxFor( item => item.Email, new { @class = "form-control", @type="email", @required="true" })
+      </div>
+
+      <div class="col-6 mt-2">
+        @Html.LabelFor( item => item.FirstName, new { @class = "label" })
+        @Html.TextBoxFor( item => item.FirstName, new { @class = "form-control", @required="true" })
+      </div>
+
+      <div class="col-6 mt-2">
+        @Html.LabelFor( item => item.LastName, new { @class = "label" })
+        @Html.TextBoxFor( item => item.LastName, new { @class = "form-control" })
+      </div>
+
+      <div class="col-6 mt-2">
+        @Html.LabelFor( item => item.Password, new { @class = "label" })
+        @Html.TextBoxFor( item => item.Password, new { @class = "form-control", @type="password", @required="true" })
+      </div>
+
+      <div class="col-6 mt-2">
+        @Html.LabelFor( item => item.ConfirmPassword, new { @class = "label" })
+        @Html.TextBoxFor( item => item.ConfirmPassword, new { @class = "form-control", @type="password", @required="true" })
+      </div>
+
+      <div class="col-12 mt-4 d-flex align-items-center">
+        <button type="submit" class="btn btn-success">Registrar Usuario</button>
+      </div>
+
+    </form>
+  </div>
+</div>

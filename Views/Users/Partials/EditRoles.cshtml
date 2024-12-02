@@ -1,0 +1,16 @@
+@model UpdateRolesRequest
+<form id="rolesForm" method="patch" class="row mt-4 border rounded p-4 bg-light">
+    <div class="col-12 mb-2 p-1 border-bottom d-flex">
+      <h4 class="fs-5">Roles del usuario</h4>
+    </div>
+
+    <div class="col-12 d-flex">
+      @foreach(var item in Model.RolesAvailables)
+      {
+      <div class="form-check form-switch mx-2">
+        <input class="form-check-input" type="checkbox" id="@item.Value" value="@item.Value" checked="@Model.Roles.Contains(Convert.ToInt32(item.Value))">
+        <label class="form-check-label" for="@item.Value">@item.Text</label>
+      </div>
+      }
+    </div>
+</form>

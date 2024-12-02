@@ -1,0 +1,47 @@
+﻿@using System.Globalization
+@model UserResponse?
+@{
+  ViewData["ActivePage"] = "Editar Persona";
+}
+
+<div class="d-flex align-items-baseline mb-2">
+  <h1 class="display-6">@ViewBag.Title</h1>
+  <div class="ms-auto">
+    <partial name="../Shared/Breadcrumb" />
+  </div>
+</div>
+
+<div class="container rounded bg-white">
+
+  <div class="row">
+      <div class="col-12 border-right">
+        <div class="d-flex align-items-center text-center p-1">
+            <img class="border rounded-circle" alt="Imagen de perfil" width="80" height="80" src="https://ui-avatars.com/api/?color=333&rounded=true&name=@( Model.FullName!.Replace(" ", "+") )"/>
+            <div class="container d-flex flex-column align-items-start">
+              <span class="text-black-50 text-wrap">@Model.Email</span>
+              <span class="text-black-50 text-wrap">@Model.FullName</span>
+            </div>
+        </div>
+      </div>
+  </div>
+
+  <partial name="partials/EditGenerals.cshtml" model="@ViewBag.UserUpdateGeneralsRequest"/>
+  
+  <partial name="partials/EditRoles.cshtml" model="@ViewBag.UpdateRolesRequest"/>
+
+  <partial name="partials/EditCredentials.cshtml" model="@ViewBag.UserUpdateCredentialsRequest" />
+
+</div>
+
+<style>
+  .label {
+    margin-top: .3rem;
+  }
+</style>
+
+@section scripts {
+  <script>
+    let currentUserID = '@Html.Raw(Model.Id)';
+  </script>
+  <script src="~/js/user/userEdit.js"></script>
+}
