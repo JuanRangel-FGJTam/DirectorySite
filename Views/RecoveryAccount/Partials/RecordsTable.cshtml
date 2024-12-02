@@ -1,0 +1,39 @@
+﻿@model IEnumerable<DirectorySite.Models.RecoveryAccountResponse>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Contacto</th>
+            <th scope="col">Fecha Regitro</th>
+            <th scope="col">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var i = 1;
+        }
+        @foreach( var record in Model)
+        {
+            <tr>
+                <td scope="row">@i</td>
+                <td>
+                    <div class="flex align-items-center">
+                        <div class="text-sm text-uppercase">@record.FullName</div>
+                        <div class="text-sm">@record.Curp</div>
+                    </div>
+                </td>
+                <td>@record.ContactEmail</td>
+                <td>
+                    <div class="flex align-items-center">
+                        <div class="text-sm text-uppercase">@record.CreatedAt.ToString("dd MMM yyyy")</div>
+                        <div class="text-sm">@record.CreatedAt.ToString("HH:mm")</div>
+                    </div>
+                </td>
+                <td>
+                    <a class="btn btn-link" href="#">Mostrar</a>
+                </td>
+            </tr>
+            i++;
+        }
+</table>
