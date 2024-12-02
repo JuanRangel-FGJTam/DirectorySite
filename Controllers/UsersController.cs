@@ -232,5 +232,38 @@ namespace DirectorySite.Controllers
             }
         }
 
+        [HttpGet("/new")]
+        public IActionResult NewUser()
+        {
+            var request = new NewUserRequest();
+            return View(request);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> StoreUser(NewUserRequest request)
+        {
+
+            // TODO: Validate request
+            bool valid = true;
+            if(!valid)
+            {
+                return UnprocessableEntity();
+            }
+
+
+            // * store the new user
+            try
+            {
+                var user = await this.userService.StoreNewUser(request);
+            }
+            catch (Exception e)
+            {
+                // Add a custom error message
+                ViewBag.ErrorMessage = e.Message;
+                return View("~/Views/Users/NewUser.cshtml");
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Data;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Headers;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authentication;
@@ -180,6 +181,67 @@ namespace DirectorySite.Services
             {
                 this.logger.LogError(err, "Fail at attempt to update the user: {message}", err.Message);
                 return 0;
+            }
+
+        }
+
+
+        /// <summary>
+        /// </summary>
+        /// <param name="NewUserRequest"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token</exception>
+        /// <exception cref="ArgumentException">Some validations fails</exception>
+        public async Task<int> StoreNewUser(NewUserRequest request)
+        {
+            LoadAuthToken();
+
+            // * prepare the payload
+            var payload = JsonConvert.SerializeObject(request, jsonSerializerSettings);
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/user"),
+                Method = HttpMethod.Post,
+                Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+
+            // * send the request
+            IDictionary<string,object>? responseObject = null;
+            try
+            {
+                var httpResponse = await httpClient.SendAsync(httpRequest);
+                // * process the response
+                responseObject = await httpResponse.Content.ReadFromJsonAsync<IDictionary<string,object>>();
+                this.logger.LogDebug("Response:[{response}]", responseObject);
+                httpResponse.EnsureSuccessStatusCode();
+                return 1;
+            }
+            catch(HttpRequestException httpex)
+            {
+                this.logger.LogError(httpex, "Fail at store the new user: {message}", httpex.Message);
+                
+                // TODO: Validate the http status code
+                switch (httpex.StatusCode)
+                {
+                    case HttpStatusCode.UnprocessableEntity:
+                        var errorMessages = Newtonsoft.Json.JsonConvert.DeserializeObject<ICollection<IDictionary<string,object>>>(responseObject!["errors"].ToString()??"");
+                        throw new ArgumentException(string.Join(", ", errorMessages!.Select( item => item["value"])));
+
+                    case HttpStatusCode.BadRequest:
+                        throw new ArgumentException(responseObject!["message"].ToString());
+                    
+                    default:
+                        throw new ApplicationException( httpex.Message);
+                }
+            }
+            catch(Exception err)
+            {
+                this.logger.LogError(err, "Fail at attempt to store the user: {message}", err.Message);
+                throw new ApplicationException(err.Message);
             }
 
         }
