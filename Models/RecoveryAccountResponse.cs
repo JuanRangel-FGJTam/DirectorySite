@@ -114,5 +114,10 @@ namespace DirectorySite.Models;
                 return string.Join(" ", [ Name, FirstName, LastName]);
             }
         }
+        public string BirthdateFormated {
+            get {
+                return BirthDate.ToString("dd MMMM yyyy");
+            }
+        }
     }
 

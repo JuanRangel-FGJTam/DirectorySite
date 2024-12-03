@@ -21,6 +21,33 @@ namespace DirectorySite.Controllers
             return View();
         }
 
+        [HttpGet("{recordID}")]
+        public async Task<IActionResult> Show(string recordID)
+        {
+            try
+            {
+                var record = await this.recoveryAccountService.GetRequestById(recordID);
+                ViewData["Title"] = $"Peticion {recordID}";
+                return View(record);
+            }
+            catch (KeyNotFoundException)
+            {
+                ViewData["Title"] = $"Peticion no encontrada";
+                ViewBag.NotFoundMessage = "No se encontro ninguna solicitud activa con este id.";
+                return View("~/Views/Shared/NotFound.cshtml");
+            }
+            catch (Exception e)
+            {
+                this._logger.LogError(e, "Fal at attempt to retrive the request info: {message}", e.Message);
+                var vm = new ErrorViewModel
+                {
+                    Message = "Error al obtener la peticion"
+                };
+                return View("~/Views/Shared/Error.cshtml", vm);
+            }
+            
+        }
+
         #region Partial views
         [Route("table-records")]
         public async Task<IActionResult> GetTableRecords(){

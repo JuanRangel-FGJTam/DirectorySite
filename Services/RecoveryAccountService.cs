@@ -61,6 +61,50 @@ namespace DirectorySite.Services
             }
         }
 
+        /// <summary>
+        /// return the recovery requests info with files 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token or id invalid</exception>
+        /// <exception cref="ArgumentException">The request is invalid</exception>
+        /// <exception cref="KeyNotFoundException"></exception>
+        public async Task<RecoveryAccountResponse> GetRequestById(string requestId)
+        {
+            // * load the authToken if is not loaded
+            if(string.IsNullOrEmpty(authToken)){
+                RetriveAuthToken();
+            }
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/accountRecovery/{requestId}"),
+                Method = HttpMethod.Get
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+            
+            // * send the request
+            try
+            {
+                var httpResponse = await httpClient.SendAsync(httpRequest);
+                httpResponse.EnsureSuccessStatusCode();
+                return await httpResponse.Content.ReadFromJsonAsync<RecoveryAccountResponse>()
+                    ?? throw new KeyNotFoundException("The recovery request was not found");
+            }
+            catch(HttpRequestException httpex)
+            {
+                this.logger.LogError(httpex, "Fail at get the preregister records: {message}", httpex.Message);
+                throw httpex.StatusCode switch
+                {
+                    HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
+                    HttpStatusCode.BadRequest => new ArgumentException(),
+                    HttpStatusCode.NotFound => new KeyNotFoundException("The recovery request was not found"),
+                    _ => new Exception(),
+                };
+            }
+        }
+
         #region private methods
 
         /// <summary>
