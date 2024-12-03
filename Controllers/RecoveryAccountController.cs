@@ -45,7 +45,67 @@ namespace DirectorySite.Controllers
                 };
                 return View("~/Views/Shared/Error.cshtml", vm);
             }
-            
+        }
+
+
+        [HttpPatch("{recordID}")]
+        [Produces(MediaTypeNames.Application.Json)]
+        public async Task<IActionResult> FinishRequest([FromRoute] string recordID, [FromForm] string comments)
+        {
+            RecoveryAccountResponse recoveryRecord;
+            try
+            {
+                recoveryRecord = await this.recoveryAccountService.GetRequestById(recordID);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return Conflict();
+            }
+
+            // * update the request
+            try 
+            {
+                await this.recoveryAccountService.UpdateTheRequest(recordID, comments);
+                return RedirectToAction("index", "RecoveryAccount");
+
+            }catch(Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpDelete("{recordID}")]
+        [Produces(MediaTypeNames.Application.Json)]
+        public async Task<IActionResult> DeleteRequest([FromRoute] string recordID, [FromForm] string comments)
+        {
+            RecoveryAccountResponse recoveryRecord;
+            try
+            {
+                recoveryRecord = await this.recoveryAccountService.GetRequestById(recordID);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return Conflict();
+            }
+
+             // * update the request
+            try 
+            {
+                await this.recoveryAccountService.DeleteTheRequest(recordID, comments);
+                return RedirectToAction("index", "RecoveryAccount");
+            }
+            catch(Exception)
+            {
+                return BadRequest();
+            }
         }
 
         #region Partial views

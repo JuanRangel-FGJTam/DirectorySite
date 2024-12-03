@@ -6,6 +6,7 @@
             <th scope="col">Nombre</th>
             <th scope="col">Contacto</th>
             <th scope="col">Fecha Regitro</th>
+            <th scope="col">Atendido</th>
             <th scope="col">Acciones</th>
         </tr>
     </thead>
@@ -29,6 +30,15 @@
                         <div class="text-sm text-uppercase">@record.CreatedAt.ToString("dd MMM yyyy")</div>
                         <div class="text-sm">@record.CreatedAt.ToString("HH:mm")</div>
                     </div>
+                </td>
+                <td>
+                    @if(record.FinishedAt != null)
+                    {
+                        <div class="flex align-items-center">
+                            <div class="text-sm text-uppercase">@record.FinishedAt.Value.ToString("dd MMM yyyy")</div>
+                            <div class="text-sm">@record.FinishedAt.Value.ToString("HH:mm")</div>
+                        </div>
+                    }
                 </td>
                 <td>
                     <a class="btn btn-link" asp-action="show" asp-controller="RecoveryAccount" asp-route-recordID="@record.Id">Mostrar</a>
