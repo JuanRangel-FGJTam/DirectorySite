@@ -12,7 +12,6 @@
 </head>
 <body>
     @{
-
         var usernameClaim = User.Claims.Where( c => c.Type == ClaimTypes.Email ).FirstOrDefault();
         ViewData["UserName"] = usernameClaim !=null ? usernameClaim.Value :"";
     }
@@ -44,6 +43,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="RecoveryAccount" asp-action="Index">Recuperacion de Cuentas</a>
                         </li>
+
+                        @if(User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Usuarios</a>
+                            </li>
+                        }
                     </ul>
                 </div>
                 

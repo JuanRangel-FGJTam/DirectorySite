@@ -196,7 +196,28 @@ namespace DirectorySite.Services
 
         public async Task<IEnumerable<Occupation>?> GetColonies()
         {
-           throw new NotImplementedException();
-        }       
+            throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<Role>?> GetRoles()
+        {
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, "/user/roles-availables"),
+                Method = HttpMethod.Get
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            
+            var httpResponse = await httpClient.SendAsync( httpRequest );
+
+            if( httpResponse.IsSuccessStatusCode ){
+                var data = await httpResponse.Content.ReadFromJsonAsync<IEnumerable<Role>>();
+                return data;
+            }
+
+            this.logger.LogError("(-) Error at get catalog of user roles " + httpResponse.StatusCode );
+            return null;
+        }
     }
 }

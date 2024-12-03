@@ -32,5 +32,10 @@ public class HomeController : Controller
         return View();
     }
 
-    
+    [HttpGet("/forbid")]
+    public IActionResult Forbiden()
+    {
+        ViewData["Title"] = "Acceso denegado";
+        return View();
+    }
 }

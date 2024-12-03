@@ -1,0 +1,25 @@
+@model UserUpdateGeneralsRequest
+<form id="generalDataForm" method="patch" class="row mt-4 border rounded p-4 bg-light">
+    <div class="col-12 mb-2 p-1 border-bottom d-flex">
+      <h4 class="fs-5">Datos generales</h4>
+    </div>
+
+    <div class="col-4">
+        @Html.LabelFor( item => item.FirstName, new { @class = "label" })
+        @Html.TextBoxFor( item => item.FirstName, new { @class = "form-control", @required="true" })
+    </div>
+
+    <div class="col-4">
+        @Html.LabelFor( item => item.LastName, new { @class = "label" })
+        @Html.TextBoxFor( item => item.LastName, new { @class = "form-control" })
+    </div>
+
+    <div class="col-4">
+        @Html.LabelFor( item => item.Email, new { @class = "label" })
+        @Html.TextBoxFor( item => item.Email, new { @class = "form-control", @type="email", @required="true" })
+    </div>
+
+    <div class="col-12 mt-4 d-flex align-items-center">
+      <button type="submit" class="btn btn-success">Actualizar Datos</button>
+    </div>
+</form>

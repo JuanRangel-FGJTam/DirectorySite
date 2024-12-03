@@ -27,6 +27,7 @@ builder.Services.AddScoped<PeopleService>();
 builder.Services.AddScoped<PeopleSessionService>();
 builder.Services.AddScoped<PeopleProcedureService>();
 builder.Services.AddScoped<RecoveryAccountService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddPreregisterServices();
 
 var app = builder.Build();
