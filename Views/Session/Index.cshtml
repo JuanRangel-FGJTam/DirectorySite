@@ -29,9 +29,8 @@
                     <th scope="col">Person</th>
                     <th scope="col">Ip Address</th>
                     <th scope="col">User Agent</th>
-                    <th scope="col">Begin</th>
-                    <th scope="col">End </th>
-                    <th scope="col">Token</th>
+                    <th class="text-center" scope="col">Begin</th>
+                    <th class="text-center" scope="col">End </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,7 +43,11 @@
                             <td>
                                 <div class="flex flex-column">
                                     <div class="text-sm">@session.Person.FullName</div>
-                                    <div class="text-secondary" style="font-size: .9rem;">@session.Person!.Id</div>
+                                    <div class="text-secondary" style="font-size: .9rem;">
+                                        <a class="btn btn-link p-0 m-0" asp-action="Person" asp-controller="People" asp-route-personID="@session.Person!.Id"#>
+                                            @session.Person!.Id
+                                        </a>
+                                    </div>
                                 </div>
                             </td>
                             <td>@session.IpAddress</td>
@@ -60,9 +63,6 @@
                                     <div class="text-sm text-uppercase">@session.EndAt!.Value.ToString("dd MMM yyyy")</div>
                                     <div class="text-sm">@session.EndAt!.Value.ToString("HH:mm")</div>
                                 </div>
-                            </td>
-                            <td>
-                                <textarea readonly class="rounded-md border-gray-400">@session.Token</textarea>
                             </td>
                         </tr>
                         i++;
