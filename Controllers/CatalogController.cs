@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using DirectorySite.Data;
-using DirectorySite.Services;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Mvc.Rendering;
+using DirectorySite.Data;
+using DirectorySite.Models;
+using DirectorySite.Services;
+using DirectorySite.Models.ViewModel;
 
 namespace DirectorySite.Controllers
 {
@@ -17,6 +19,10 @@ namespace DirectorySite.Controllers
         #region Fields
         private readonly ILogger<CatalogController> _logger = logger;
         private readonly CatalogService catalogService = catalogService ;
+        
+        private int locaCountryID = 137;
+        private int localStateID = 1;
+        private int localMunicipalityId = 1;
         #endregion
 
         public IActionResult Index()
@@ -52,7 +58,111 @@ namespace DirectorySite.Controllers
             var data = await catalogService.GetContactTypes();
             return View( data );
         }
+        
 
+        [Route("countries")]
+        public async Task<IActionResult> Countries()
+        {
+            ViewData["Title"] = "Catalogo - Paises";
+            var data = await catalogService.GetCountries();
+            return View(data);
+        }
+
+        [Route("States")]
+        public async Task<IActionResult> States(int? countryId )
+        {
+            if(countryId != null && countryId > 0)
+            {
+                locaCountryID = countryId.Value;
+            }
+
+            var countries = (await catalogService.GetCountries()) ?? [];
+            var states = (await catalogService.GetStates(locaCountryID)) ?? [];
+            this._logger.LogDebug("Total states: {total}", states.Count());
+            
+            var viewModel = new CatalogStatesViewModel 
+            {
+                CountryId = locaCountryID,
+                Countries = countries.ToList(),
+                States = states.ToList()
+            };
+
+            ViewData["Title"] = "Catalogo - Estados";
+            ViewData["ActivePage"] = "States";
+            return View(viewModel);
+        }
+
+        [Route("Municipalities")]
+        public async Task<IActionResult> Municipalities(int? countryId, int? stateId)
+        {
+            if(countryId != null && countryId > 0)
+            {
+                locaCountryID = countryId.Value;
+            }
+
+            if(stateId != null && stateId > 0)
+            {
+                localStateID = stateId.Value;
+            }
+
+            var countries = (await catalogService.GetCountries()) ?? [];
+            var states = (await catalogService.GetStates(locaCountryID)) ?? [];
+            var municipalities = (await catalogService.GetMunicipalities(localStateID)) ?? [];
+            this._logger.LogDebug("Total Municipios: {total}", states.Count());
+
+            var viewModel = new CatalogStatesViewModel 
+            {
+                CountryId = locaCountryID,
+                StateId = localStateID,
+                Countries = countries.ToList(),
+                States = states.ToList(),
+                Municipalities = municipalities.ToList(),
+            };
+
+            ViewData["Title"] = "Catalogo - Municipios";
+            ViewData["ActivePage"] = "Municipios";
+            return View(viewModel);
+        }
+
+        [Route("Colonies")]
+        public async Task<IActionResult> Colonies(int? countryId, int? stateId, int? municipalityId )
+        {
+            if(countryId != null && countryId > 0)
+            {
+                locaCountryID = countryId.Value;
+            }
+
+            if(stateId != null && stateId > 0)
+            {
+                localStateID = stateId.Value;
+            }
+
+            if(municipalityId != null && municipalityId > 0)
+            {
+                localMunicipalityId = municipalityId.Value;
+            }
+
+            var countries = (await catalogService.GetCountries()) ?? [];
+            var states = (await catalogService.GetStates(locaCountryID)) ?? [];
+            var municipalities = (await catalogService.GetMunicipalities(localStateID)) ?? [];
+            var colonies = (await catalogService.GetColonies(localMunicipalityId)) ?? [];
+            this._logger.LogDebug("Total Municipios: {total}", states.Count());
+
+            var viewModel = new CatalogStatesViewModel 
+            {
+                CountryId = locaCountryID,
+                StateId = localStateID,
+                MunicipalityId = localMunicipalityId,
+                Countries = countries.ToList(),
+                States = states.ToList(),
+                Municipalities = municipalities.ToList(),
+                Colonies = colonies.ToList()
+            };
+
+            ViewData["Title"] = "Catalogo - Colonias";
+            ViewData["ActivePage"] = "Colonias";
+            return View(viewModel);
+        }
 
         [HttpPost]
         [Route("occupations")]

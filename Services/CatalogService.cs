@@ -146,17 +146,17 @@ namespace DirectorySite.Services
                 return data;
             }
 
-            this.logger.LogError("(-) Error at get catalog of Countries " + httpResponse.StatusCode );
+            this.logger.LogError("Error at get catalog of Countries " + httpResponse.StatusCode );
             return null;
         }
         
-        public async Task<IEnumerable<State>?> GetStates()
+        public async Task<IEnumerable<State>?> GetStates(int countryId = 0)
         {
 
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/states"),
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/states?country_id={countryId}"),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
@@ -168,17 +168,16 @@ namespace DirectorySite.Services
                 return data;
             }
 
-            this.logger.LogError("(-) Error at get catalog of States " + httpResponse.StatusCode );
+            this.logger.LogError("Error at get catalog of States " + httpResponse.StatusCode );
             return null;
         }
         
-        public async Task<IEnumerable<Municipality>?> GetMunicipalities()
+        public async Task<IEnumerable<Municipality>?> GetMunicipalities(int stateId = 0)
         {
-
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/municipalities"),
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/municipalities?state_id={stateId}"),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
@@ -190,13 +189,29 @@ namespace DirectorySite.Services
                 return data;
             }
 
-            this.logger.LogError("(-) Error at get catalog of Municipality " + httpResponse.StatusCode );
+            this.logger.LogError("Fail at get catalog of Municipality " + httpResponse.StatusCode );
             return null;
         }
 
-        public async Task<IEnumerable<Occupation>?> GetColonies()
+        public async Task<IEnumerable<Colony>?> GetColonies(int municipalityId = 0)
         {
-            throw new NotImplementedException();
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/colonies?municipality_id={municipalityId}"),
+                Method = HttpMethod.Get
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            
+            var httpResponse = await httpClient.SendAsync( httpRequest );
+
+            if( httpResponse.IsSuccessStatusCode ){
+                var data = await httpResponse.Content.ReadFromJsonAsync<IEnumerable<Colony>>();
+                return data;
+            }
+
+            this.logger.LogError("Fail at get the catalog of colonies " + httpResponse.StatusCode );
+            return null;
         }
 
         public async Task<IEnumerable<Role>?> GetRoles()
@@ -216,7 +231,7 @@ namespace DirectorySite.Services
                 return data;
             }
 
-            this.logger.LogError("(-) Error at get catalog of user roles " + httpResponse.StatusCode );
+            this.logger.LogError("Error at get catalog of user roles " + httpResponse.StatusCode );
             return null;
         }
     }
