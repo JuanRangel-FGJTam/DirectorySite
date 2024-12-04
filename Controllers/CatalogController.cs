@@ -92,6 +92,44 @@ namespace DirectorySite.Controllers
             return View(viewModel);
         }
 
+        [HttpPost("States")]
+        public async Task<IActionResult> StoreState([FromForm] int countryId, [FromForm] string name)
+        {
+            try
+            {
+                // * get the country related
+                var countries = await catalogService.GetCountries() ?? throw new Exception("Errot at attempt to get the countries");
+                var country = countries.FirstOrDefault(item => item.Id == countryId) ?? throw new ArgumentException("The countryId was not found on the system", "countryId" );
+
+                // * validate the name
+                if(string.IsNullOrEmpty(name))
+                {
+                    throw new ArgumentException("The name must not be null and empty", "name" ); 
+                }
+
+               // TODO: post the form
+               _logger.LogDebug("New countryId{id} name{name}", countryId, name);
+
+                return Ok( new {
+                    Message = $"The state '{name}' was created"
+                });
+            }
+            catch(ArgumentException ae)
+            {
+                return UnprocessableEntity( new {
+                    Message = "Error al validar la solicitud",
+                    Errors = new Dictionary<string,string>{ { ae.ParamName??"err", ae.Message } }
+                });
+            }
+            catch(Exception e)
+            {
+                return Conflict( new {
+                    Title = "Error al registrar el estado",
+                    Message = e.Message,
+                });
+            }
+        }
+
         [Route("Municipalities")]
         public async Task<IActionResult> Municipalities(int? countryId, int? stateId)
         {
@@ -122,6 +160,48 @@ namespace DirectorySite.Controllers
             ViewData["Title"] = "Catalogo - Municipios";
             ViewData["ActivePage"] = "Municipios";
             return View(viewModel);
+        }
+
+        [HttpPost("Municipalities")]
+        public async Task<IActionResult> StoreMunicipality([FromForm] int countryId, [FromForm] int stateId, [FromForm] string name)
+        {
+            try
+            {
+                _logger.LogInformation("New countryId{id} sateId{sid} name{name}", countryId, stateId, name);
+
+                // * get the country related
+                var countries = await catalogService.GetCountries() ?? throw new Exception("Errot at attempt to get the countries");
+                var country = countries.FirstOrDefault(item => item.Id == countryId) ?? throw new ArgumentException("The countryId was not found on the system.", "countryId" );
+                
+                var states = await catalogService.GetStates(countryId) ?? throw new Exception("Errot at attempt to get the states");
+                var state = states.FirstOrDefault(item => item.Id == stateId) ?? throw new ArgumentException("The stateId was not found on the system.", "stateId" );
+                
+                // * validate the name
+                if(string.IsNullOrEmpty(name))
+                {
+                    throw new ArgumentException("The name must not be null and empty", "name" ); 
+                }
+
+               // TODO: post the forms
+
+                return Ok( new {
+                    Message = $"The state '{name}' was created"
+                });
+            }
+            catch(ArgumentException ae)
+            {
+                return UnprocessableEntity( new {
+                    Message = "Error al validar la solicitud",
+                    Errors = new Dictionary<string,string>{ { ae.ParamName??"err", ae.Message } }
+                });
+            }
+            catch(Exception e)
+            {
+                return Conflict( new {
+                    Title = "Error al registrar el estado",
+                    Message = e.Message,
+                });
+            }
         }
 
         [Route("Colonies")]
@@ -163,6 +243,50 @@ namespace DirectorySite.Controllers
             ViewData["ActivePage"] = "Colonias";
             return View(viewModel);
         }
+        
+        [HttpPost("Colonies")]
+        public async Task<IActionResult> StoreColonies([FromForm] int countryId, [FromForm] int stateId, [FromForm] int municipalityId, [FromForm] string name)
+        {
+            try
+            {
+                // * get the country related
+                var countries = await catalogService.GetCountries() ?? throw new Exception("Errot at attempt to get the countries");
+                var country = countries.FirstOrDefault(item => item.Id == countryId) ?? throw new ArgumentException("The countryId was not found on the system.", "countryId" );
+                
+                var states = await catalogService.GetStates(countryId) ?? throw new Exception("Errot at attempt to get the states");
+                var state = states.FirstOrDefault(item => item.Id == stateId) ?? throw new ArgumentException("The stateId was not found on the system.", "stateId" );
+
+                var municipalities = await catalogService.GetMunicipalities(stateId) ?? throw new Exception("Errot at attempt to get the municipalities");
+                var municipality = states.FirstOrDefault(item => item.Id == municipalityId) ?? throw new ArgumentException("The municipalityId was not found on the system.", "municipalityId" );
+                
+                // * validate the name
+                if(string.IsNullOrEmpty(name))
+                {
+                    throw new ArgumentException("The name must not be null and empty", "name" ); 
+                }
+
+               // TODO: post the forms
+
+                return Ok( new {
+                    Message = $"The state '{name}' was created"
+                });
+            }
+            catch(ArgumentException ae)
+            {
+                return UnprocessableEntity( new {
+                    Message = "Error al validar la solicitud",
+                    Errors = new Dictionary<string,string>{ { ae.ParamName??"err", ae.Message } }
+                });
+            }
+            catch(Exception e)
+            {
+                return Conflict( new {
+                    Title = "Error al registrar el estado",
+                    Message = e.Message,
+                });
+            }
+        }
+
 
         [HttpPost]
         [Route("occupations")]

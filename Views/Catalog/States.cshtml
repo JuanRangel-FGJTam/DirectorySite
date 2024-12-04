@@ -54,21 +54,30 @@
 <!-- Modals -->
 <div class="modal fade" id="newElementModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
   <div class="modal-dialog">
-    <form class="modal-content" id="new-element-form">
+    <form id="new-element-form" class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="exampleModalLabel">Agregar elemento</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+
       <div class="modal-body">
-        <div class="mb-3">
+        <div class="mb-2">
+            <label for="new-element-country" class="col-form-label">Pais</label>
+            @Html.TextBoxFor(item => item.CountryId, new { @class="form-control", @hidden="true"})
+            @Html.TextBoxFor(item => item.CountryName, new { @class="form-control", @disabled="true"})
+        </div>
+      
+        <div class="mb-2">
             <label for="new-element-name" class="col-form-label">Nombre:</label>
-            <input type="text" class="form-control" id="new-element-name">
+            <input type="text" class="form-control" id="new-element-name" name="name">
         </div>
       </div>
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         <button type="submit" class="btn btn-success" id="new-element-submit" >Guardar Cambios</button>
       </div>
+
     </form>
   </div>
 </div>
@@ -76,55 +85,44 @@
 @section Scripts {
     <script>
 
-        /**
-        * @@param {Event} event
-        */
-        function handleNewElementFormSubmit(event){
+        function handleSubmitForm(event){
             event.preventDefault();
             
-            // * retrive the input text
-            let _inputName = "";
-            try {
-                _inputName = $("#new-element-name").val();
-            }catch(err){
-                console.error(err);
-            }
-
-            // * validate if the input is not null or empty
-            if( _inputName === null || _inputName.trim() === ""){
-                return;
-            }
-
-            submitNewElement(_inputName);
-        }
-
-        /**
-        * @@param {String} newElement
-        */
-        function submitNewElement(newElement){
-            $.ajax("/catalog/occupations", {
-                method: 'POST',
-                data: {
-                    name: newElement
+            const form = $(this);
+            const dataForm = form.serialize();
+            
+            $.ajax({
+                url: '/catalog/states',
+                type: 'POST',
+                data: dataForm,
+                success: function(response) {
+                    Swal.fire({
+                        title: "Datos actualizados",
+                        icon: "success"
+                    });
                 },
-                contentType: 'application/x-www-form-urlencoded',
-                success: (data, status, jqXHR)=>{
-                    console.dir(data);
-                    console.dir(status);
-                    if(status == 'success'){
-                        dimissModal();
-
-                        var {message} = data;
-                        alert(message);
+                error: function(xhr, status, error) {
+                    if(xhr.status == 422)
+                    {
+                        const { errors } = xhr.responseJSON || {};
+                        const errorMessages = errors ? Object.values(errors).flat().join('\n') : "Datos inválidos.";
+                        Swal.fire({
+                            title: "Uno o más datos son inválidos",
+                            text: errorMessages,
+                            icon: "warning",
+                            confirmButtonText: "Revisar"
+                        });
+                        return;
                     }
+
+                    Swal.fire({
+                        title: "Error al actualizar los datos",
+                        text: xhr.statusText || "Error desconocido",
+                        icon: "error"
+                    });
                 }
-            }).done(function(){
-                //
-            }).fail(function(err){
-                const {statusText} = err;
-                console.dir(statusText);
-                console.error(err);
             });
+
         }
 
         function dimissModal(){
@@ -133,7 +131,7 @@
         }
 
         $(document).ready(function(){
-            $("#new-element-form").submit(handleNewElementFormSubmit);
+            $("#new-element-form").submit(handleSubmitForm);
             
             $("#selectCountry").on("change", function(e){
                 var constryId = $(this).val();

@@ -29,4 +29,19 @@ public class CatalogStatesViewModel
         get => Municipalities.Select( item => new SelectListItem(item.Name, item.Id.ToString()));
     }
 
+    public string? CountryName
+    {
+        get => Countries.FirstOrDefault( item => item.Id == CountryId)?.Name;
+    }
+
+    public string? StateName
+    {
+        get => States.FirstOrDefault( item => item.Id == StateId)?.Name;
+    }
+
+    public string? MunicipalityName
+    {
+        get => Municipalities.FirstOrDefault( item => item.Id == MunicipalityId)?.Name;
+    }
+
 }
