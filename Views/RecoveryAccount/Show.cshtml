@@ -1,0 +1,244 @@
+﻿@model DirectorySite.Models.RecoveryAccountResponse
+@{
+    ViewData["ActivePage"] = "Peticion";
+}
+
+<div class="d-flex align-items-baseline mb-2">
+    <h1 class="display-6 d-flex align-items-baseline">
+        @ViewBag.Title
+    </h1>
+  <div class="ms-auto">
+    <partial name="../Shared/Breadcrumb">
+  </div>
+</div>
+
+<div class="container ">
+    <div class="row">
+        <div class="col-8">
+            <div class="row p-2">
+                <div class="col-12 border-bottom mb-2">
+                    <h4>Datos Generales</h4>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="label">Nombre</label>
+                    <input type="text" class="form-control" disabled value="@Model.Name">
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="label">Apellidos</label>
+                    <input type="text" class="form-control" disabled value="@Model.FirstName @Model.LastName">
+                </div>
+                
+                <div class="col-md-12">
+                    <label class="label">CURP</label>
+                    <input type="text" class="form-control" disabled value="@Model.Curp">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="label">Genero</label>
+                    <input type="text" class="form-control" disabled value="@Model.GenderName">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="label">Fecha de nacimiento</label>
+                    <input type="text" class="form-control" disabled value="@Model.BirthdateFormated">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="label">Nacionalidad</label>
+                    <input type="text" class="form-control" disabled value="@Model.NationalityName">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-4">
+            <div class="row p-2">
+                <div class="col-12 border-bottom mb-2">
+                    <h4>Datos de Contacto</h4>
+                </div>
+
+                <div class="col-12">
+                    <label class="label">Correo Electronico</label>
+                    <input type="text" class="form-control" disabled value="@Model.ContactEmail">
+                </div>
+
+                <div class="col-12">
+                    <label class="label">Correo Electronico Alterno</label>
+                    <input type="text" class="form-control" disabled value="@Model.ContactEmail2">
+                </div>
+                
+                <div class="col-12">
+                    <label class="label">Telefono Contacto</label>
+                    <input type="text" class="form-control" disabled value="@Model.ContactPhone">
+                </div>
+
+                <div class="col-12">
+                    <label class="label">Telefono Contacto Alterno</label>
+                    <input type="text" class="form-control" disabled value="@Model.ContactPhone2">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="row p-2">
+                <div class="col-12 border-bottom mb-2">
+                    <h4>Solicitud</h4>
+                </div>
+
+                <div class="col-12">
+                    <label class="label">Fecha solicitud</label>
+                    <input type="text" class="form-control" disabled value="@Model.CreatedAt">
+                </div>
+
+                <div class="col-12">
+                    <label class="label">Comentarios</label>
+                    <textarea type="text" class="form-control" disabled rows="4" style="resize: none;"> @Model.RequestComments</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="row p-2">
+                <div class="col-12 border-bottom mb-2">
+                    <h4>Archivos</h4>
+                </div>
+
+                <div class="col-12">
+                    <label class="label mb-1">Archivos adjuntos: @Model.TotalDocuments</label>
+                </div>
+
+                <div class="col-12">
+                    <ul>
+                        @foreach(var f in Model.Files??[])
+                        {
+                            <li>
+                                <a href="@f.FileUrl" target="_blank" class="btn btn-link p-0 m-0 text-truncate">@string.Join(" : ", [f.DocumentTypeName, f.FileName])</a>
+                            </li>
+                        }
+                        @if(!(Model.Files??[]).Any())
+                        {
+                            <div class="alert alert-warning" role="alert">
+                                No hay archivos cargados
+                            </div>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="container border rounded rounded border-secondary my-2 p-3">
+    <form id="finishRequestForm" class="row" method="post">
+        <div class="col-12 border-bottom mb-2">
+            <h4>Respuesta</h4>
+        </div>
+        <div class="col-12">
+            <label class="label">Comentarios</label>
+            <textarea id="txtComments" type="text" class="form-control" rows="4" disabled="@(Model.FinishedAt!=null || Model.DeletedAt!=null)">@Model.ResponseComments</textarea>
+        </div>
+        @if(Model.FinishedAt == null && Model.DeletedAt == null)
+        {
+            <div class="col-12 d-flex justify-content-between pt-4">
+                <button id="btn-finish" type="button" class="btn btn-success">Concluir Solicitud</button>
+                <button id="btn-cancel" type="button" class="btn btn-danger">Cancelar Solicitud</button>
+            </div>
+        }
+        @if(Model.FinishedAt != null)
+        {
+            <div class="col-4 mt-2">
+                <label class="label">Finilizado el dia @Model.FinishedAt</label>
+            </div>
+        }
+
+    </form>
+</div>
+
+
+@section scripts {
+    @if(Model.FinishedAt == null && Model.DeletedAt == null)
+    {
+        <script>
+            function finishRequest()
+            {
+                const form = $(this);
+                const url = `/RecoveryAccount/${currentRequestID}`;
+                const method = 'PATCH';
+                const messageText = $('#txtComments').val();
+                
+                // Create a FormData object
+                var formData = new FormData();
+                formData.append('comments', messageText);
+
+                $.ajax({
+                    url: url,
+                    type: method,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        Swal.fire({
+                            title: "Solicitud finalizada",
+                            icon: "success"
+                        }).then((result) => {
+                            window.location.href = "/recoveryAccount";
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: "Error al realizar la peticion",
+                            icon: "error"
+                        });
+                    }
+                });
+            }
+            
+            function cancelRequest()
+            {
+                const form = $(this);
+                const url = `/RecoveryAccount/${currentRequestID}`;
+                const method = 'DELETE';
+                const messageText = $('#txtComments').val();
+                
+                // Create a FormData object
+                var formData = new FormData();
+                formData.append('comments', messageText);
+
+                $.ajax({
+                    url: url,
+                    type: method,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        Swal.fire({
+                            title: "Solicitud cancelada",
+                            icon: "success"
+                        }).then((result) => {
+                            window.location.href = "/recoveryAccount";
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: "Error al realizar la peticion",
+                            icon: "error"
+                        });
+                    }
+                });
+            }
+
+            jQuery(document).ready(()=>
+            {   
+                $("#btn-finish").on("click", finishRequest);
+                $("#btn-cancel").on("click", cancelRequest);
+            });
+
+            let currentRequestID = '@Html.Raw(Model.Id)';
+        </script>
+    }
+}

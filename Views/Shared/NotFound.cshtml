@@ -1,10 +1,12 @@
 ﻿@{
-    ViewData["Title"] = "Not Found";
+    if(!ViewData.ContainsKey("Title")){
+        ViewData["Title"] = "Not Found";
+    }
 }
 
 <div class="container" style="margin-top: 6rem;">
     <div class="row text-center">
-        <h1 class="text">Not Found</h1>
+        <h1 class="text">@ViewData["Title"]</h1>
         <h2 class="text">
             @if(ViewBag.NotFoundMessage != null)
             {
