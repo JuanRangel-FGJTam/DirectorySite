@@ -78,8 +78,8 @@
         </div>
       
         <div class="mb-2">
-            <label for="new-element-name" class="col-form-label">Nombre:</label>
-            <input type="text" class="form-control" id="new-element-name" name="name">
+            <label for="new-element-name" class="col-form-name">Nombre:</label>
+            <input type="text" class="form-control" id="new-element-name" name="name" required>
         </div>
       </div>
 
@@ -108,6 +108,10 @@
                     Swal.fire({
                         title: "Datos actualizados",
                         icon: "success"
+                    })
+                    .then(()=>{
+                        dimissModal();
+                        location.reload();
                     });
                 },
                 error: function(xhr, status, error) {

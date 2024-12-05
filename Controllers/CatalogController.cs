@@ -107,9 +107,9 @@ namespace DirectorySite.Controllers
                     throw new ArgumentException("The name must not be null and empty", "name" ); 
                 }
 
-               // TODO: post the form
-               _logger.LogDebug("New countryId{id} name{name}", countryId, name);
-
+               // * register the new data
+               var res = await this.catalogService.StoreNewState(countryId, name);
+               
                 return Ok( new {
                     Message = $"The state '{name}' was created"
                 });
@@ -182,7 +182,8 @@ namespace DirectorySite.Controllers
                     throw new ArgumentException("The name must not be null and empty", "name" ); 
                 }
 
-               // TODO: post the forms
+               // * register the new catalog element
+               var res = await this.catalogService.StoreNewMunicipality(countryId, stateId, name);
 
                 return Ok( new {
                     Message = $"The state '{name}' was created"
@@ -245,7 +246,7 @@ namespace DirectorySite.Controllers
         }
         
         [HttpPost("Colonies")]
-        public async Task<IActionResult> StoreColonies([FromForm] int countryId, [FromForm] int stateId, [FromForm] int municipalityId, [FromForm] string name)
+        public async Task<IActionResult> StoreColonies([FromForm] int countryId, [FromForm] int stateId, [FromForm] int municipalityId, [FromForm] string name, [FromForm] int zipCode)
         {
             try
             {
@@ -257,7 +258,7 @@ namespace DirectorySite.Controllers
                 var state = states.FirstOrDefault(item => item.Id == stateId) ?? throw new ArgumentException("The stateId was not found on the system.", "stateId" );
 
                 var municipalities = await catalogService.GetMunicipalities(stateId) ?? throw new Exception("Errot at attempt to get the municipalities");
-                var municipality = states.FirstOrDefault(item => item.Id == municipalityId) ?? throw new ArgumentException("The municipalityId was not found on the system.", "municipalityId" );
+                var municipality = municipalities.FirstOrDefault(item => item.Id == municipalityId) ?? throw new ArgumentException("The municipalityId was not found on the system.", "municipalityId" );
                 
                 // * validate the name
                 if(string.IsNullOrEmpty(name))
@@ -265,7 +266,8 @@ namespace DirectorySite.Controllers
                     throw new ArgumentException("The name must not be null and empty", "name" ); 
                 }
 
-               // TODO: post the forms
+               // * register the new catalog element
+               var res = await this.catalogService.StoreNewColony(countryId, stateId, municipalityId, name, zipCode);
 
                 return Ok( new {
                     Message = $"The state '{name}' was created"

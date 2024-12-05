@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
-using DirectorySite.Models;
 using Microsoft.AspNetCore.Authentication;
+using DirectorySite.Models;
 
 namespace DirectorySite.Services
 {
@@ -234,5 +234,75 @@ namespace DirectorySite.Services
             this.logger.LogError("Error at get catalog of user roles " + httpResponse.StatusCode );
             return null;
         }
+    
+        public async Task<int> StoreNewState(int countryId, string name)
+        {
+            var payload =  new {
+                CountryId = countryId,
+                Name = name
+            };
+            
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/states"),
+                Method = HttpMethod.Post,
+                Content = JsonContent.Create(payload)
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            var httpResponse = await httpClient.SendAsync(httpRequest);
+            httpResponse.EnsureSuccessStatusCode();
+            return 1;
+            
+        }
+
+        public async Task<int> StoreNewMunicipality(int countryId, int stateId, string name)
+        {
+            var payload =  new {
+                CountryId = countryId,
+                StateId = stateId,
+                Name = name
+            };
+            
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/municipalities"),
+                Method = HttpMethod.Post,
+                Content = JsonContent.Create(payload)
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            var httpResponse = await httpClient.SendAsync(httpRequest);
+            httpResponse.EnsureSuccessStatusCode();
+            return 1;
+            
+        }
+
+        public async Task<int> StoreNewColony(int countryId, int stateId, int municipalityId, string name, int zipCode)
+        {
+            var payload =  new {
+                CountryId = countryId,
+                StateId = stateId,
+                MunicipalityId = municipalityId,
+                Name = name,
+                ZipCode = zipCode.ToString()
+            };
+
+            var jsonPayload  = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            this.logger.LogCritical(jsonPayload);
+            
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/colonies"),
+                Method = HttpMethod.Post,
+                Content = JsonContent.Create(payload)
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            var httpResponse = await httpClient.SendAsync(httpRequest);
+            httpResponse.EnsureSuccessStatusCode();
+            return 1;
+        }
+
     }
 }
