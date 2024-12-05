@@ -1,6 +1,7 @@
 ﻿@model DirectorySite.Models.RecoveryAccountResponse
 @{
     ViewData["ActivePage"] = "Peticion";
+    var edition = (Model.FinishedAt == null && Model.DeletedAt == null);
 }
 
 <div class="d-flex align-items-baseline mb-2">
@@ -136,11 +137,21 @@
         <div class="col-12 border-bottom mb-2">
             <h4>Respuesta</h4>
         </div>
+        @if(edition)
+        {
+        <div class=" col-12 mb-2">
+            <input class="form-check-input" type="checkbox" value="" id="notifyEmail" checked />
+            <label class="form-check-label" for="notifyEmail">
+                Notificar por correo electronico
+            </label>
+        </div>
+        }
+
         <div class="col-12">
             <label class="label">Comentarios</label>
             <textarea id="txtComments" type="text" class="form-control" rows="4" disabled="@(Model.FinishedAt!=null || Model.DeletedAt!=null)">@Model.ResponseComments</textarea>
         </div>
-        @if(Model.FinishedAt == null && Model.DeletedAt == null)
+        @if(edition)
         {
             <div class="col-12 d-flex justify-content-between pt-4">
                 <button id="btn-finish" type="button" class="btn btn-success">Concluir Solicitud</button>
@@ -159,8 +170,7 @@
 
 
 @section scripts {
-    @if(Model.FinishedAt == null && Model.DeletedAt == null)
-    {
+    
         <script>
             function finishRequest()
             {
@@ -168,10 +178,12 @@
                 const url = `/RecoveryAccount/${currentRequestID}`;
                 const method = 'PATCH';
                 const messageText = $('#txtComments').val();
+                const notifyEmail = $('#notifyEmail').is(':checked');
                 
                 // Create a FormData object
                 var formData = new FormData();
                 formData.append('comments', messageText);
+                formData.append('notifyEmail', notifyEmail);
 
                 $.ajax({
                     url: url,
@@ -203,10 +215,12 @@
                 const url = `/RecoveryAccount/${currentRequestID}`;
                 const method = 'DELETE';
                 const messageText = $('#txtComments').val();
+                const notifyEmail = $('#notifyEmail').is(':checked');
                 
                 // Create a FormData object
                 var formData = new FormData();
                 formData.append('comments', messageText);
+                formData.append('notifyEmail', notifyEmail);
 
                 $.ajax({
                     url: url,
@@ -240,5 +254,5 @@
 
             let currentRequestID = '@Html.Raw(Model.Id)';
         </script>
-    }
+    
 }
