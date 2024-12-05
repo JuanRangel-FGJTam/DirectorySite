@@ -36,7 +36,7 @@
                                     <td>@item.Id</td>
                                     <td>@item.Name</td>
                                     <td>
-                                        <a asp-action="Municipalities" asp-controller="Catalog" asp-route-stateId="@item.Id" class="btn btn-link m-0 p-0" tabindex="-1" role="button" aria-disabled="true">
+                                        <a asp-action="Municipalities" asp-controller="Catalog" asp-route-countryId="@Model.CountryId" asp-route-stateId="@item.Id" class="btn btn-link m-0 p-0" tabindex="-1" role="button" aria-disabled="true">
                                             Mostrar Municipios
                                         </a>
                                     </td>
