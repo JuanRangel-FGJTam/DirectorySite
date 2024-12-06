@@ -22,6 +22,37 @@
   @if(Model != null){
     <script>
       let currentPersonID = '@Html.Raw(Model.PersonId)';
+
+      function handleCloseSesionButton(e)
+      {
+        console.dir(e);
+        const sessionId = e.target.id.split("_")[1];
+
+        const url = `/session/${sessionId}`;
+        const method = 'DELETE';
+
+        $.ajax({
+            url: url,
+            type: method,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                Swal.fire({
+                    title: "Session eliminada",
+                    icon: "success"
+                }).then((result) => {
+                    window.location.reload();
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: "Error al cerrar la sesion",
+                    icon: "error"
+                });
+            }
+        });
+      }
     </script>
     <script src="~/js/person/personSessions.js"></script>
   }

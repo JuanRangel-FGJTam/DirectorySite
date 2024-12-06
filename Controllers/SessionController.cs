@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DirectorySite.Data;
 using DirectorySite.Models;
+using DirectorySite.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -13,10 +14,11 @@ namespace DirectorySite.Controllers
 
     [Auth]
     [Route("[controller]")]
-    public class SessionController(ILogger<SessionController> logger, IHttpClientFactory httpClientFactory) : Controller
+    public class SessionController(ILogger<SessionController> logger, IHttpClientFactory httpClientFactory, PeopleSessionService pss) : Controller
     {
         private readonly ILogger<SessionController> _logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
+        private readonly PeopleSessionService peopleSessionService = pss;
 
         public async Task<IActionResult> Index()
         {
@@ -47,5 +49,36 @@ namespace DirectorySite.Controllers
             return View( responseData );
         }
 
+        
+        [HttpDelete("{sessionID}")]
+        public async Task<IActionResult> CloseSession([FromRoute] string sessionID)
+        {
+            try
+            {
+                await peopleSessionService.DeleteSession(sessionID);
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return RedirectToAction("Login", "Authentication");
+            }
+            catch (KeyNotFoundException knfe)
+            {
+                return UnprocessableEntity(
+                    new {
+                        Message = knfe.Message
+                    }
+                );
+            }
+            catch (Exception err)
+            {
+                return Conflict(
+                    new {
+                        Message = err.Message
+                    }
+                );
+            }
+        }
+        
     }
 }

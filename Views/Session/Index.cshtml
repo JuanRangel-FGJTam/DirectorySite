@@ -31,6 +31,7 @@
                     <th scope="col">User Agent</th>
                     <th class="text-center" scope="col">Begin</th>
                     <th class="text-center" scope="col">End </th>
+                    <th class="text-center" scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,27 +42,39 @@
                         <tr>
                             <td scope="row"> @i </td>
                             <td>
-                                <div class="flex flex-column">
-                                    <div class="text-sm">@session.Person.FullName</div>
-                                    <div class="text-secondary" style="font-size: .9rem;">
-                                        <a class="btn btn-link p-0 m-0" asp-action="Person" asp-controller="People" asp-route-personID="@session.Person!.Id"#>
-                                            @session.Person!.Id
-                                        </a>
+                                @if(@session.Person != null)
+                                {
+                                    <div class="flex flex-column">
+                                        <div class="text-sm">@session.Person!.FullName</div>
+                                        <div class="text-secondary" style="font-size: .9rem;">
+                                            <a class="btn btn-link p-1 m-0" asp-action="Person" asp-controller="People" asp-route-personID="@session.Person!.Id"#>
+                                                @session.Person!.Id
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                }
+                                else
+                                {
+                                    <div class="text-sm">*</div>
+                                }
                             </td>
                             <td>@session.IpAddress</td>
                             <td>@session.UserAgent</td>
                             <td>
-                                <div class="flex flex-column align-items-center text-center">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <div class="text-sm text-uppercase">@session.BegginAt!.Value.ToString("dd MMM yyyy")</div>
                                     <div class="text-sm">@session.BegginAt!.Value.ToString("HH:mm")</div>
                                 </div>
                             </td>
                             <td>
-                                <div class="flex flex-column align-items-center text-center">
+                                <div class="d-flex flex-column align-items-center text-center">
                                     <div class="text-sm text-uppercase">@session.EndAt!.Value.ToString("dd MMM yyyy")</div>
                                     <div class="text-sm">@session.EndAt!.Value.ToString("HH:mm")</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <button type="button" class="close-session btn btn-secondary" id="btn_@session.SessionID">Cerrar Sesion</button>
                                 </div>
                             </td>
                         </tr>
@@ -71,3 +84,42 @@
         </div>
     </div>
 </div>
+
+@section scripts
+{
+    <script>
+        function handleCloseSesionButton(e)
+        {
+            const sessionId = e.target.id.split("_")[1];
+
+            const url = `/session/${sessionId}`;
+            const method = 'DELETE';
+
+            $.ajax({
+                url: url,
+                type: method,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: "Session eliminada",
+                        icon: "success"
+                    }).then((result) => {
+                        window.location.reload();
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Error al cerrar la sesion",
+                        icon: "error"
+                    });
+                }
+            });
+            
+        }
+        $(document).ready(()=>{
+            $("button.btn.close-session").on('click', handleCloseSesionButton);
+        });
+    </script>
+}
