@@ -50,7 +50,7 @@ namespace DirectorySite.Controllers
 
         [HttpPatch("{recordID}")]
         [Produces(MediaTypeNames.Application.Json)]
-        public async Task<IActionResult> FinishRequest([FromRoute] string recordID, [FromForm] string comments)
+        public async Task<IActionResult> FinishRequest([FromRoute] string recordID, [FromForm] string comments, [FromForm] bool notifyEmail = false)
         {
             RecoveryAccountResponse recoveryRecord;
             try
@@ -69,7 +69,7 @@ namespace DirectorySite.Controllers
             // * update the request
             try 
             {
-                await this.recoveryAccountService.UpdateTheRequest(recordID, comments);
+                await this.recoveryAccountService.UpdateTheRequest(recordID, comments, notifyEmail);
                 return RedirectToAction("index", "RecoveryAccount");
 
             }catch(Exception)
@@ -80,7 +80,7 @@ namespace DirectorySite.Controllers
 
         [HttpDelete("{recordID}")]
         [Produces(MediaTypeNames.Application.Json)]
-        public async Task<IActionResult> DeleteRequest([FromRoute] string recordID, [FromForm] string comments)
+        public async Task<IActionResult> DeleteRequest([FromRoute] string recordID, [FromForm] string comments, [FromForm] bool notifyEmail = false)
         {
             RecoveryAccountResponse recoveryRecord;
             try
@@ -99,7 +99,7 @@ namespace DirectorySite.Controllers
              // * update the request
             try 
             {
-                await this.recoveryAccountService.DeleteTheRequest(recordID, comments);
+                await this.recoveryAccountService.DeleteTheRequest(recordID, comments, notifyEmail);
                 return RedirectToAction("index", "RecoveryAccount");
             }
             catch(Exception)

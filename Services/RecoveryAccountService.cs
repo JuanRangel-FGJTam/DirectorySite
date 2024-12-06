@@ -116,7 +116,7 @@ namespace DirectorySite.Services
         /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token or id invalid</exception>
         /// <exception cref="ArgumentException">The request is invalid</exception>
         /// <exception cref="KeyNotFoundException"></exception>
-        public async Task<int> UpdateTheRequest(string requestId, string comments)
+        public async Task<int> UpdateTheRequest(string requestId, string comments, bool notifyEmail)
         {
             // * load the authToken if is not loaded
             if(string.IsNullOrEmpty(authToken)){
@@ -125,7 +125,8 @@ namespace DirectorySite.Services
 
             // * prepare the payload
             var payloadRequest = JsonConvert.SerializeObject( new {
-                ResponseComments = comments
+                ResponseComments = comments,
+                NotifyEmail = notifyEmail ? 1 :0
             });
 
             // * prepare the request
@@ -165,7 +166,7 @@ namespace DirectorySite.Services
         /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token or id invalid</exception>
         /// <exception cref="ArgumentException">The request is invalid</exception>
         /// <exception cref="KeyNotFoundException"></exception>
-        public async Task<int> DeleteTheRequest(string requestId, string comments)
+        public async Task<int> DeleteTheRequest(string requestId, string comments, bool notifyEmail)
         {
             // * load the authToken if is not loaded
             if(string.IsNullOrEmpty(authToken)){
@@ -174,7 +175,8 @@ namespace DirectorySite.Services
 
             // * prepare the payload
             var payloadRequest = JsonConvert.SerializeObject( new {
-                ResponseComments = comments
+                ResponseComments = comments,
+                NotifyEmail = notifyEmail ? 1 :0
             });
 
             // * prepare the request

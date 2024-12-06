@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using DirectorySite.Data;
 using DirectorySite.Models;
 using DirectorySite.Services;
+using DirectorySite.Models.ViewModel;
 
 namespace DirectorySite.Controllers
 {
@@ -27,37 +28,35 @@ namespace DirectorySite.Controllers
         private readonly PeopleProcedureService peopleProcedureService = _peopleProcedureService;
         private readonly CatalogService catalogService = _catalogService;
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index([FromQuery] string? search)
         {
-            // Retrive the auth token
-            var AuthToken = HttpContext.Session.GetString("JWTToken")!;
-
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Index([FromForm] string? search)
-        {
-
-            ViewBag.SearchText = search;
-
-            if( string.IsNullOrEmpty(search)){
-                return View();
+            var viewModel = new PeopleIndexViewModel
+            {
+                Search = search    
+            };
+            
+            if(string.IsNullOrEmpty(search))
+            {
+                return View(viewModel);
             }
 
-            try {
-                var peopleSearched = await this.peopleSearchService.SearchPerson(search!);
-                return View(peopleSearched);
-            }catch(Exception err){
+            try
+            {
+                viewModel.People = await this.peopleSearchService.SearchPerson(search!) ?? [];
+                return View(viewModel);
+            }
+            catch(Exception err)
+            {
                 this._logger.LogError(err, "Fail at search the person");
                 ViewBag.ErrorMessage = "Error al realizar la busqueda, " + err.Message;
-                return View();
+                return View(viewModel);
             }
         }
+
 
         [HttpGet]
         [Route("{personID}")]
-        public async Task<IActionResult> Person([FromRoute] string personID){
+        public async Task<IActionResult> Person([FromRoute] string personID, [FromQuery] string? searchText){
             PersonResponse? personResponse = null;
             try
             {
@@ -70,6 +69,11 @@ namespace DirectorySite.Controllers
             catch(Exception err)
             {
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
+            }
+
+            if(!string.IsNullOrEmpty(searchText))
+            {
+                ViewBag.SearchText = searchText;
             }
             
             return View(personResponse);

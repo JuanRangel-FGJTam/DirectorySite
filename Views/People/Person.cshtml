@@ -1,12 +1,14 @@
 ﻿@using System.Globalization
 @model PersonResponse?
 @{
-    ViewData["Title"] = ( Model == null ?"Persona no encontrada" : Model.FullName??"*Sin nombre");
-    ViewData["ActivePage"] = "Personas";
+  ViewData["Title"] = ( Model == null ?"Persona no encontrada" : Model.FullName??"*Sin nombre");
+  ViewData["ActivePage"] = "Personas";
 }
 
 <div class="d-flex align-items-baseline mb-2">
-  <h1 class="display-6">@ViewBag.Title</h1>
+  <h1 class="display-6">
+    @ViewBag.Title
+  </h1>
   <div class="ms-auto">
     <partial name="../Shared/Breadcrumb">
   </div>

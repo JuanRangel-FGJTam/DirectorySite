@@ -1,5 +1,5 @@
 ﻿@using System.Globalization
-@model IEnumerable<DirectorySite.Models.SearchPersonResponse>?
+@model DirectorySite.Models.ViewModel.PeopleIndexViewModel
 @{
     ViewData["Title"] = "Busqueda de personas";
     ViewData["ActivePage"] = "Personas";
@@ -14,9 +14,11 @@
 
 <div class="container">
     <div class="row">
-        <form id="form-search" role="search" asp-action="Index" asp-controller="People" method="post">
-            <input type="search" id="search "name="search" style="width: 24rem;" value="@ViewBag.SearchText" placeholder="Nombre, Correo, Curp, RFC"/>
-            <button class="">Buscar</button>
+        <form id="form-search" role="search" asp-action="Index" asp-controller="People" method="get" class="col-sm-12 col-md-6">
+            <div class="input-group mb-3">
+                @Html.TextBoxFor(item => item.Search, new { @type="search", @class="form-control", @placeholder="Nombre, Correo, Curp, RFC" })
+                <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+            </div>
         </form>
     </div>
 </div>
@@ -37,12 +39,12 @@
                 <th scope="col">Acciones</th>
                 </tr>
             </thead>
-            @if( Model != null && Model.Any() ){
+            @if( Model.People != null && Model.People.Any() ){
                 <tbody>
                     @{
                         var i = 1;
                     }
-                    @foreach( var person in Model??[] ){
+                    @foreach( var person in Model.People??[] ){
                         <tr>
                             <td scope="row"> @i </td>
                             <td class="d-none">
@@ -63,7 +65,7 @@
                                 }
                             </td>
                             <td>
-                                <a class="btn btn-link" asp-action="Person" asp-controller="People" asp-route-personID="@person.Id" target="_blank">Mostrar</a>
+                                <a class="btn btn-link" asp-action="Person" asp-controller="People" asp-route-personID="@person.Id" asp-route-searchText="@ViewBag.Search">Mostrar</a>
                             </td>
                         </tr>
                         i++;

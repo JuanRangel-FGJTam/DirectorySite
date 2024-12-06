@@ -13,6 +13,9 @@ function submitGeneralDataForm(event){
             Swal.fire({
                 title: "Datos actualizados",
                 icon: "success"
+            })
+            .then(()=>{
+                location.href = `/people/${currentPersonID}`;
             });
         },
         error: function(xhr, status, error) {
