@@ -172,8 +172,6 @@ namespace DirectorySite.Controllers
         [Produces(MediaTypeNames.Application.Json)]
         public async Task<IActionResult> UpdateContactInformation([FromRoute] string personID, [FromForm] UpdatePersonContactRequest request)
         {
-            // TODO: Validate the request
-
             // * attempt to get the person
             PersonResponse? personResponse = null;
             try
@@ -182,6 +180,7 @@ namespace DirectorySite.Controllers
             }
             catch(UnauthorizedAccessException)
             {
+                this._logger.LogInformation("Redirect");
                 return Unauthorized();
             }
             catch(Exception err)
@@ -195,16 +194,17 @@ namespace DirectorySite.Controllers
             // * update the contact information of the person
             try
             {
-                var response = await peopleService.UpdateContactInformation(personID, request);
+                var response = await peopleService.UpdatePersonEmail(personID, request.Email!); 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                return Conflict();
+                return Unauthorized();
             }
-            catch (ArgumentException)
+            catch (ArgumentException a)
             {
-                return Conflict();
+                var cMessage = a.Message.Replace("email","").Replace("(","").Replace(")","").Trim();
+                return Conflict(cMessage);
             }
             catch (InvalidDataException)
             {
