@@ -20,6 +20,8 @@ namespace DirectorySite.Services
         {
             NullValueHandling = NullValueHandling.Ignore
         };
+
+        private string authToken = string.Empty;
         
 
         /// <summary>
@@ -82,21 +84,10 @@ namespace DirectorySite.Services
         /// <exception cref="InvalidDataException">Some internal error happens</exception>
         public async Task<int> UpdatePerson(string personID, UpdatePersonGeneralsRequest request)
         {
-            // * get the Auth token
-            string authToken = string.Empty;
-            try
-            {
-                authToken = httpContextAccessor.HttpContext!.Session.GetString("JWTToken")!;
-            }
-            catch(Exception ex)
-            {
-                logger.LogError(ex, "Error at attempting to retrive the auth token: {message}", ex.Message);
-                throw new UnauthorizedAccessException();
-            }
+            LoadAuthToken();
 
             // * prepare the payload
             var payload = JsonConvert.SerializeObject(request, jsonSerializerSettings);
-
 
             // * prepare the request
             using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
@@ -129,17 +120,7 @@ namespace DirectorySite.Services
 
         public async Task<int> UpdateContactInformation(string personID, UpdatePersonContactRequest request)
         {
-            // * get the Auth token
-            string authToken = string.Empty;
-            try
-            {
-                authToken = httpContextAccessor.HttpContext!.Session.GetString("JWTToken")!;
-            }
-            catch(Exception ex)
-            {
-                logger.LogError(ex, "Error at attempting to retrive the auth token: {message}", ex.Message);
-                throw new UnauthorizedAccessException();
-            }
+            LoadAuthToken();
 
             // * prepare the payload
             var payload = JsonConvert.SerializeObject( new {
@@ -174,5 +155,71 @@ namespace DirectorySite.Services
 
             return 1;
         }
+    
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="personID"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException">The auth token is invalid</exception>
+        /// <exception cref="ArgumentException">The request is invalid</exception>
+        /// <exception cref="InvalidDataException">Some internal error happens</exception>
+        public async Task<int> UpdatePersonEmail(string personID, string newEmail)
+        {
+            LoadAuthToken();
+
+            // * prepare the payload
+            var payload = JsonConvert.SerializeObject(new {
+                Email = newEmail
+            }, jsonSerializerSettings);
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                Method = HttpMethod.Patch,
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/people/{personID}"),
+                Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+
+            // * send the request and validate the response
+            var response = await httpClient.SendAsync(httpRequest);
+            try
+            {
+                response.EnsureSuccessStatusCode();
+            }
+            catch(HttpRequestException httpEx)
+            {
+                
+                throw httpEx.StatusCode switch
+                {
+                    System.Net.HttpStatusCode.BadRequest => new ArgumentException(httpEx.Message, httpEx),
+                    System.Net.HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
+                    System.Net.HttpStatusCode.UnprocessableEntity => new ArgumentException("email", "Correo no valido o ya se encuentra ocupado."),
+                    _ => new InvalidDataException(),
+                };
+            }
+
+            return 1;
+        }
+
+
+        private void LoadAuthToken()
+        {
+            // * get the Auth token
+            try
+            {
+                authToken = httpContextAccessor.HttpContext!.Session.GetString("JWTToken")!;
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "Error at attempting to retrive the auth token: {message}", ex.Message);
+                throw new UnauthorizedAccessException();
+            }
+        }
+
     }
 }

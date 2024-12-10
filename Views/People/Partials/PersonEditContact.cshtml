@@ -5,7 +5,7 @@
         <form id="contactForm" class="row my-2" asp-action="UpdateContactInformation" asp-route-personId="@Model.PersonId" method="patch">
             <div class="mb-2 col-md-12">
                 @Html.LabelFor(item => item.Email, new { @class="label"})
-                @Html.TextBoxFor(item => item.Email, new { @class="form-control", @type="email"})
+                @Html.TextBoxFor(item => item.Email, new { @class="form-control", @type="email", @required="true"})
             </div>
 
             <div class="mt-2">
