@@ -1,0 +1,48 @@
+﻿@model IEnumerable<DirectorySite.Models.SearchPersonResponse>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">CURP</th>
+            <th scope="col">Correo</th>
+            <th scope="col">Fecha Nacimiento</th>
+            <th scope="col">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var i = 1;
+        }
+        @foreach( var record in Model)
+        {
+            <tr>
+                <td scope="row">@i</td>
+                <td>
+                    <div class="text-sm text-uppercase">@record.FullName</div>
+                </td>
+                <td>
+                    <div class="text-sm">@record.Curp</div>
+                </td>
+                <td>@record.Email</td>
+                <td>
+                    @record.Birthdate!.Value.ToShortDateString()
+                </td>
+                <td>
+                    <a class="btn btn-link" asp-action="Person" asp-controller="People" asp-route-personID="@record.Id">Mostrar</a>
+                </td>
+            </tr>
+            i++;
+        }
+
+        @if(!Model.Any())
+        {
+            <tr>
+                <td colspan="6" scope="row">
+                    <div class="alert alert-warning mt-2 mx-2" role="alert">
+                    No se encontraron personas que coincidan con estos datos.
+                    </div>
+                </td>
+            </tr>
+        }
+</table>

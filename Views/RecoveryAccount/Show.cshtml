@@ -128,11 +128,28 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
-<div class="container border rounded rounded border-secondary my-2 p-3">
+
+<div class="container mt-2">
+    <div class="row align-items-start">
+        <div class="col-12 border-bottom mb-2">
+            <h4>Coincidencia de Personas</h4>
+        </div>
+        <div id="table-coincidences" class="col-12">
+            <div class="d-flex align-items-center alert alert-primary mt-3" role="alert">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="mx-2" style="font-size: 1rem;">Cargando datos</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container border rounded rounded border-secondary mt-4 mb-2 p-3">
     <form id="finishRequestForm" class="row" method="post">
         <div class="col-12 border-bottom mb-2">
             <h4>Respuesta</h4>
@@ -171,88 +188,88 @@
 
 @section scripts {
     
-        <script>
-            function finishRequest()
-            {
-                const form = $(this);
-                const url = `/RecoveryAccount/${currentRequestID}`;
-                const method = 'PATCH';
-                const messageText = $('#txtComments').val();
-                const notifyEmail = $('#notifyEmail').is(':checked');
-                
-                // Create a FormData object
-                var formData = new FormData();
-                formData.append('comments', messageText);
-                formData.append('notifyEmail', notifyEmail);
+    <script>
+        let currentRequestID = '@Html.Raw(Model.Id)';
 
-                $.ajax({
-                    url: url,
-                    type: method,
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        Swal.fire({
-                            title: "Solicitud finalizada",
-                            icon: "success"
-                        }).then((result) => {
-                            window.location.href = "/recoveryAccount";
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            title: "Error al realizar la peticion",
-                            icon: "error"
-                        });
-                    }
-                });
-            }
+        function finishRequest()
+        {
+            const form = $(this);
+            const url = `/RecoveryAccount/${currentRequestID}`;
+            const method = 'PATCH';
+            const messageText = $('#txtComments').val();
+            const notifyEmail = $('#notifyEmail').is(':checked');
             
-            function cancelRequest()
-            {
-                const form = $(this);
-                const url = `/RecoveryAccount/${currentRequestID}`;
-                const method = 'DELETE';
-                const messageText = $('#txtComments').val();
-                const notifyEmail = $('#notifyEmail').is(':checked');
-                
-                // Create a FormData object
-                var formData = new FormData();
-                formData.append('comments', messageText);
-                formData.append('notifyEmail', notifyEmail);
+            // Create a FormData object
+            var formData = new FormData();
+            formData.append('comments', messageText);
+            formData.append('notifyEmail', notifyEmail);
 
-                $.ajax({
-                    url: url,
-                    type: method,
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        Swal.fire({
-                            title: "Solicitud cancelada",
-                            icon: "success"
-                        }).then((result) => {
-                            window.location.href = "/recoveryAccount";
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            title: "Error al realizar la peticion",
-                            icon: "error"
-                        });
-                    }
-                });
-            }
-
-            jQuery(document).ready(()=>
-            {   
-                $("#btn-finish").on("click", finishRequest);
-                $("#btn-cancel").on("click", cancelRequest);
+            $.ajax({
+                url: url,
+                type: method,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: "Solicitud finalizada",
+                        icon: "success"
+                    }).then((result) => {
+                        window.location.href = "/recoveryAccount";
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Error al realizar la peticion",
+                        icon: "error"
+                    });
+                }
             });
+        }
+        
+        function cancelRequest()
+        {
+            const form = $(this);
+            const url = `/RecoveryAccount/${currentRequestID}`;
+            const method = 'DELETE';
+            const messageText = $('#txtComments').val();
+            const notifyEmail = $('#notifyEmail').is(':checked');
+            
+            // Create a FormData object
+            var formData = new FormData();
+            formData.append('comments', messageText);
+            formData.append('notifyEmail', notifyEmail);
 
-            let currentRequestID = '@Html.Raw(Model.Id)';
-        </script>
-    
+            $.ajax({
+                url: url,
+                type: method,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: "Solicitud cancelada",
+                        icon: "success"
+                    }).then((result) => {
+                        window.location.href = "/recoveryAccount";
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: "Error al realizar la peticion",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+
+        jQuery(document).ready(()=>
+        {
+            $("#btn-finish").on("click", finishRequest);
+            $("#btn-cancel").on("click", cancelRequest);
+            $("#table-coincidences").load(`/RecoveryAccount/people-coincidence?recordID=${currentRequestID}`);
+        });
+    </script>
 }
