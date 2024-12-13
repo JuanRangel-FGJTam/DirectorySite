@@ -109,6 +109,19 @@ namespace DirectorySite.Models;
         [JsonPropertyName("files")]
         public List<RecoveryAccountFile>? Files { get; set; }
 
+        [JsonPropertyName("userAttended")]
+        public string? UserAttended { get; set; }
+
+        [JsonPropertyName("userAttendedId")]
+        public int? UserAttendedId { get; set; }
+
+        [JsonPropertyName("userDeleted")]
+        public string? UserDeleted { get; set; }
+
+        [JsonPropertyName("userDeletedId")]
+        public int? UserDeletedId { get; set; }
+
+
         public string FullName {
             get {
                 return string.Join(" ", [ Name, FirstName, LastName]);
