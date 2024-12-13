@@ -1,4 +1,10 @@
 ﻿@model IEnumerable<DirectorySite.Models.RecoveryAccountResponse>
+@{
+    int currentPage = Convert.ToInt32(ViewBag.CurrentPage);
+    int totalPages = Convert.ToInt32(ViewBag.TotalPages);
+    int totalRecords = Convert.ToInt32(ViewBag.TotalRecords);
+    int skipRecords = Convert.ToInt32(ViewBag.Skip);
+}
 <table class="table table-striped table-hover">
     <thead>
         <tr>
@@ -12,7 +18,7 @@
     </thead>
     <tbody>
         @{
-            var i = 1;
+            var i = skipRecords + 1;
         }
         @foreach( var record in Model)
         {
@@ -46,4 +52,30 @@
             </tr>
             i++;
         }
+    </tbody>
 </table>
+
+<div class="d-flex align-items-center justify-content-between">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item" @(currentPage <= 1 ? "disabled" : "")">
+                <a class="page-link" href="@(currentPage > 1 ? $"?p={currentPage - 1}" : "#")" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            @for (int p = 1; p <= totalPages; p++)
+            {
+                <li class="page-item @(currentPage == p ? "active" : "")">
+                    <a class="page-link" href="?p=@p">@p</a>
+                </li>
+            }
+            <li class="page-item" @(currentPage >= totalPages ? "disabled" : "")">
+                <a class="page-link" href="@(currentPage < totalPages ? $"?p={currentPage + 1}" : "#")" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <p class="fs-6">Total: @totalRecords.ToString("n0")</p>
+</div>

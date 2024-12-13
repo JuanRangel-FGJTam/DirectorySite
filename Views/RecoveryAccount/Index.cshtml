@@ -28,11 +28,11 @@
 
 @section scripts {
     <script>
+        const currentPage = '@Html.Raw(ViewBag.CurrentPage)';
         function loadDataTable()
         {
-            $("#tableWrapper").load(`/RecoveryAccount/table-records`);
+            $("#tableWrapper").load(`/RecoveryAccount/table-records?p=${currentPage}`);
         }
-
         jQuery(document).ready(()=>
         {
             loadDataTable();

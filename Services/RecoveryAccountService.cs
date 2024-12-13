@@ -20,7 +20,15 @@ namespace DirectorySite.Services
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
         private readonly IHttpContextAccessor httpContextAccessor = httpContextAccessor;
 
+        public Dictionary<string,string> AccountRecoveryOrderTypes = new Dictionary<string, string>{
+            {"createdAt", "Fecha de Registro"},
+            {"curp", "Curp"},
+            {"contactEmail", "Correo"},
+            {"name", "Nombre"}
+        };
+
         private string authToken = string.Empty;
+
 
         /// <summary>
         /// return the las account recovery requests
@@ -28,30 +36,48 @@ namespace DirectorySite.Services
         /// <returns></returns>
         /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token or id invalid</exception>
         /// <exception cref="ArgumentException">The request is invalid</exception>
-        public async Task<IEnumerable<RecoveryAccountResponse>> GetRequest()
+        public async Task<RecoveryAccountPaginatorResponse> GetRequest(
+            string orderBy = "createdAt",
+            bool ascending = false,
+            bool excludeConcluded = false,
+            bool excludeDeleted = false,
+            int take = 25,
+            int offset = 0
+        )
         {
             // * load the authToken if is not loaded
             if(string.IsNullOrEmpty(authToken)){
                 RetriveAuthToken();
             }
 
+            // * prepare the parameters
+            IEnumerable<string> queryParams = [
+                string.Format("take={0}", take),
+                string.Format("offset={0}", offset),
+                string.Format("orderBy={0}", orderBy),
+                string.Format("ascending={0}", ascending),
+                string.Format("excludeConcluded={0}", excludeConcluded),
+                string.Format("excludeDeleted={0}", excludeDeleted),
+            ];
+
+
             // * prepare the request
             using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/accountRecovery"),
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/accountRecovery?" + string.Join("&", queryParams)),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
             
             // * send the request
-            IEnumerable<RecoveryAccountResponse> requests = [];
+            RecoveryAccountPaginatorResponse? response;
             try
             {
                 var httpResponse = await httpClient.SendAsync(httpRequest);
                 httpResponse.EnsureSuccessStatusCode();
-                requests = await httpResponse.Content.ReadFromJsonAsync<IEnumerable<RecoveryAccountResponse>>() ?? [];
-                return requests;
+                response = await httpResponse.Content.ReadFromJsonAsync<RecoveryAccountPaginatorResponse>();
+                return response!;
             }
             catch(HttpRequestException httpex)
             {
@@ -66,7 +92,7 @@ namespace DirectorySite.Services
         }
 
         /// <summary>
-        /// return the recovery requests info with files 
+        /// return the recovery requests info with files
         /// </summary>
         /// <returns></returns>
         /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token or id invalid</exception>
