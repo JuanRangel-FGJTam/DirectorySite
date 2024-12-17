@@ -132,9 +132,21 @@ namespace DirectorySite.Controllers
                     3 => false,
                     _ => false,
                 };
+                var excludePending = filter switch{
+                    1 => false,
+                    2 => true,
+                    3 => true,
+                    _ => false,
+                };
 
                 // * make the paginator component to display
-                var recoveryAccountPaginator = await recoveryAccountService.GetRequest(take:take, offset:skip, excludeConcluded:excludeConcluded, excludeDeleted:excludeDeleted);
+                var recoveryAccountPaginator = await recoveryAccountService.GetRequest(
+                    take:take,
+                    offset:skip,
+                    excludeConcluded:excludeConcluded,
+                    excludeDeleted:excludeDeleted,
+                    excludePending:excludePending
+                );
                 ViewBag.TotalRecords = recoveryAccountPaginator.Total;
                 ViewBag.TotalPages = Math.Ceiling( (decimal) (recoveryAccountPaginator.Total / take) + 1);
                 ViewBag.CurrentPage = p;
