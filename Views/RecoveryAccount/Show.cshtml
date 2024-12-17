@@ -1,16 +1,31 @@
 ﻿@model DirectorySite.Models.RecoveryAccountResponse
 @{
     ViewData["ActivePage"] = "Peticion";
-    var edition = (Model.FinishedAt == null && Model.DeletedAt == null);
+    var edition = (Model.AttendingAt == null && Model.DeletedAt == null);
+}
+@functions
+{
+    string GetBorderColor()
+    {
+        if(Model.AttendingAt != null)
+        {
+            return "border-success";
+        }
+        if(Model.DeletedAt != null)
+        {
+            return "border-danger";
+        }
+        return "border-secondary";
+    }
 }
 
 <div class="d-flex align-items-baseline mb-2">
     <h1 class="display-6 d-flex align-items-baseline">
         @ViewBag.Title
     </h1>
-  <div class="ms-auto">
-    <partial name="../Shared/Breadcrumb">
-  </div>
+    <div class="ms-auto">
+        <partial name="../Shared/Breadcrumb">
+    </div>
 </div>
 
 <div class="container ">
@@ -149,11 +164,13 @@
 </div>
 
 
-<div class="container border rounded rounded border-secondary mt-4 mb-2 p-3">
+<div class="container border border-2 rounded @(GetBorderColor()) rounded mt-4 mb-2 p-3">
+
     <form id="finishRequestForm" class="row" method="post">
         <div class="col-12 border-bottom mb-2">
             <h4>Respuesta</h4>
         </div>
+
         @if(edition)
         {
         <div class=" col-12 mb-2">
@@ -165,9 +182,10 @@
         }
 
         <div class="col-12">
-            <label class="label">Comentarios</label>
-            <textarea id="txtComments" type="text" class="form-control" rows="4" disabled="@(Model.FinishedAt!=null || Model.DeletedAt!=null)">@Model.ResponseComments</textarea>
+            <label class="label fs-6">Comentarios</label>
+            <textarea id="txtComments" type="text" class="form-control" rows="4" disabled="@(!edition)">@Model.ResponseComments</textarea>
         </div>
+        
         @if(edition)
         {
             <div class="col-12 d-flex justify-content-between pt-4">
@@ -175,10 +193,24 @@
                 <button id="btn-cancel" type="button" class="btn btn-danger">Cancelar Solicitud</button>
             </div>
         }
-        @if(Model.FinishedAt != null)
+
+        @if(Model.AttendingAt != null)
         {
-            <div class="col-4 mt-2">
-                <label class="label">Finilizado el dia @Model.FinishedAt</label>
+            <div class="mt-2">
+                <label class="label fs-6">Finilizado el dia: <u>@Model.AttendingAt</u></label>
+            </div>
+            <div class="mt-2">
+                <label class="label fs-6">Atendido por: <u>@Model.UserAttended</u></label>
+            </div>
+        }
+
+        @if(Model.DeletedAt != null)
+        {
+            <div class="mt-2">
+                <label class="label fs-6">Cancelado el dia: <u>@Model.DeletedAt</u></label>
+            </div>
+            <div class="mt-2">
+                <label class="label fs-6">Cancelado por: <u>@Model.UserDeleted</u></label>
             </div>
         }
 

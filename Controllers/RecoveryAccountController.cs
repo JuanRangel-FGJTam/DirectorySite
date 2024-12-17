@@ -15,8 +15,9 @@ namespace DirectorySite.Controllers
         private readonly RecoveryAccountService recoveryAccountService = recoveryAccountService;
         private readonly PeopleSearchService peopleSearchService = ps;
 
-        public IActionResult Index()
+        public IActionResult Index([FromQuery] int p = 1)
         {
+            ViewBag.CurrentPage = p;
             ViewData["Title"] = "Peticiones de recuperacion de cuentas";
             return View();
         }
@@ -96,8 +97,8 @@ namespace DirectorySite.Controllers
                 return Conflict();
             }
 
-             // * update the request
-            try 
+            // * update the request
+            try
             {
                 await this.recoveryAccountService.DeleteTheRequest(recordID, comments, notifyEmail);
                 return RedirectToAction("index", "RecoveryAccount");
@@ -111,11 +112,21 @@ namespace DirectorySite.Controllers
 
         #region Partial views
         [Route("table-records")]
-        public async Task<IActionResult> GetTableRecords(){
+        public async Task<IActionResult> GetTableRecords([FromQuery] int p = 1){
             try
             {
-                IEnumerable<RecoveryAccountResponse> responseData = await recoveryAccountService.GetRequest();
-                return PartialView("~/Views/RecoveryAccount/Partials/RecordsTable.cshtml", responseData);
+                int take = 25;
+                int skip = (p-1) * take;
+
+                // * make the paginator component to display
+                var recoveryAccountPaginator = await recoveryAccountService.GetRequest(take: take, offset: skip);
+                ViewBag.TotalRecords = recoveryAccountPaginator.Total;
+                ViewBag.TotalPages = Math.Ceiling( (decimal) (recoveryAccountPaginator.Total / take) + 1);
+                ViewBag.CurrentPage = p;
+                ViewBag.Skip = skip;
+
+                // * return the view with the data
+                return PartialView("~/Views/RecoveryAccount/Partials/RecordsTable.cshtml", recoveryAccountPaginator.Data);
             }
             catch(Exception err)
             {
