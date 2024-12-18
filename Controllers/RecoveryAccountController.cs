@@ -15,9 +15,10 @@ namespace DirectorySite.Controllers
         private readonly RecoveryAccountService recoveryAccountService = recoveryAccountService;
         private readonly PeopleSearchService peopleSearchService = ps;
 
-        public IActionResult Index([FromQuery] int p = 1)
+        public IActionResult Index([FromQuery] int p = 1, [FromQuery] int filter = 0)
         {
             ViewBag.CurrentPage = p;
+            ViewBag.CurrentFilterStatus = filter;
             ViewData["Title"] = "Peticiones de recuperacion de cuentas";
             return View();
         }
@@ -68,7 +69,7 @@ namespace DirectorySite.Controllers
             }
 
             // * update the request
-            try 
+            try
             {
                 await this.recoveryAccountService.UpdateTheRequest(recordID, comments, notifyEmail);
                 return RedirectToAction("index", "RecoveryAccount");
@@ -112,14 +113,40 @@ namespace DirectorySite.Controllers
 
         #region Partial views
         [Route("table-records")]
-        public async Task<IActionResult> GetTableRecords([FromQuery] int p = 1){
+        public async Task<IActionResult> GetTableRecords([FromQuery] int p = 1, [FromQuery] int filter = 0){
             try
             {
                 int take = 25;
                 int skip = (p-1) * take;
 
+                // * process the filters
+                var excludeConcluded = filter switch {
+                    1 => true,
+                    2 => false,
+                    3 => true,
+                    _ => false,
+                };
+                var excludeDeleted = filter switch{
+                    1 => true,
+                    2 => true,
+                    3 => false,
+                    _ => false,
+                };
+                var excludePending = filter switch{
+                    1 => false,
+                    2 => true,
+                    3 => true,
+                    _ => false,
+                };
+
                 // * make the paginator component to display
-                var recoveryAccountPaginator = await recoveryAccountService.GetRequest(take: take, offset: skip);
+                var recoveryAccountPaginator = await recoveryAccountService.GetRequest(
+                    take:take,
+                    offset:skip,
+                    excludeConcluded:excludeConcluded,
+                    excludeDeleted:excludeDeleted,
+                    excludePending:excludePending
+                );
                 ViewBag.TotalRecords = recoveryAccountPaginator.Total;
                 ViewBag.TotalPages = Math.Ceiling( (decimal) (recoveryAccountPaginator.Total / take) + 1);
                 ViewBag.CurrentPage = p;

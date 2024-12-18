@@ -41,6 +41,7 @@ namespace DirectorySite.Services
             bool ascending = false,
             bool excludeConcluded = false,
             bool excludeDeleted = false,
+            bool excludePending = false,
             int take = 25,
             int offset = 0
         )
@@ -58,6 +59,7 @@ namespace DirectorySite.Services
                 string.Format("ascending={0}", ascending),
                 string.Format("excludeConcluded={0}", excludeConcluded),
                 string.Format("excludeDeleted={0}", excludeDeleted),
+                string.Format("excludePending={0}", excludePending),
             ];
 
 

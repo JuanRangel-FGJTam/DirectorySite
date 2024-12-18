@@ -28,11 +28,41 @@
 
 @section scripts {
     <script>
-        const currentPage = '@Html.Raw(ViewBag.CurrentPage)';
+        document.currentPage = '@Html.Raw(ViewBag.CurrentPage)';
+        document.filterStatus = '@Html.Raw(ViewBag.CurrentFilterStatus)';
+        
         function loadDataTable()
         {
-            $("#tableWrapper").load(`/RecoveryAccount/table-records?p=${currentPage}`);
+            var args = [];
+            args.push(`p=${document.currentPage}`);
+            if(document.filterStatus > 0)
+            {
+                args.push(`filter=${document.filterStatus}`);
+            }
+
+            $("#tableWrapper").load(`/RecoveryAccount/table-records?${args.join('&')}`, null, ()=>{
+                // * set the initial value
+                const selectElement = document.getElementById("selectFilter");
+                selectElement.value = document.filterStatus;
+            });
+
+            // * update the URL without reloading the page
+            history.pushState(null, "", `?${args.join('&')}`);
         }
+
+        function selectFilterOnChange(event)
+        {
+            document.filterStatus = Number(event.target.value);
+            document.currentPage = 1;
+            loadDataTable();
+        }
+
+        function goToPage(page)
+        {
+            document.currentPage = Number(page);
+            loadDataTable();
+        }
+
         jQuery(document).ready(()=>
         {
             loadDataTable();
