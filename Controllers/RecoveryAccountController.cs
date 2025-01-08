@@ -201,6 +201,10 @@ namespace DirectorySite.Controllers
 
                 // insert the results to 'people' collection
                 people = results.SelectMany(result => result).ToList();
+
+                // * prevent duplicates entries
+                people = people.GroupBy(p => p.Id).Select(g => g.First()).ToList();
+
                 return PartialView("~/Views/RecoveryAccount/Partials/PeopleCoincidences.cshtml", people);
             }
             catch(Exception err)
