@@ -10,20 +10,21 @@ namespace DirectorySite.Controllers
 {
     [Auth]
     [Route("[controller]")]
-    public class PreregisterController(ILogger<PreregisterController> logger, PreregisterService preregisterService, PreregisterDataContext preregisterDataContext) : Controller
+    public class PreregisterController(ILogger<PreregisterController> logger, PreregisterService preregisterService) : Controller
     {
         private readonly ILogger<PreregisterController> _logger = logger;
         private readonly PreregisterService preregisterService = preregisterService;
-        private readonly PreregisterDataContext preregisterDataContext = preregisterDataContext;
+        
 
-
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery] int p = 1, [FromQuery] int filter = 0)
         {
             try
             {
-                IEnumerable<PreregisterResponse> responseData = await preregisterService.GetPreregisterRecords();
-                ViewBag.LastUpdate = preregisterDataContext.LastUpdate!.Value.ToString();
-                return View(responseData);
+                ViewBag.CurrentPage = p;
+                ViewBag.CurrentFilterStatus = filter;
+                var responseData = await preregisterService.GetPreregisters();
+                ViewBag.LastUpdate = DateTime.Now;
+                return View(responseData.Data);
             }
             catch(Exception err)
             {
@@ -43,7 +44,7 @@ namespace DirectorySite.Controllers
             PreregisterResponse? responseData = null;
             try
             {
-                responseData = await preregisterService.GetPreregisterRecord(recordID);
+                responseData = await preregisterService.GetPreregisterByID(recordID);
             }
             catch(Exception err)
             {
@@ -63,31 +64,24 @@ namespace DirectorySite.Controllers
             return View(responseData);
         }
 
-        [HttpPost("table-records/refresh")]
-        [Produces(MediaTypeNames.Application.Json)]
-        public async Task<IActionResult> ForceRefreshData()
-        {
-            try
-            {
-                await preregisterService.RefreshPreregisterRecords();    
-                return Ok( new {
-                    LastUpdate = this.preregisterDataContext.LastUpdate!.Value.ToString()
-                });
-            }
-            catch (System.Exception)
-            {
-                return Conflict();
-            }
-        }
-
         #region Partial views
         [Route("table-records")]
-        public async Task<IActionResult> GetTableRecords(){
+        public async Task<IActionResult> GetTableRecords([FromQuery] int p = 1, [FromQuery] int filter = 0){
             try
             {
-                IEnumerable<PreregisterResponse> responseData = await preregisterService.GetPreregisterRecords();
-                ViewBag.LastUpdate = preregisterDataContext.LastUpdate!.Value.ToString();
-                return PartialView("~/Views/Preregister/Partials/RecordsTable.cshtml", responseData);
+                int take = 25;
+                int skip = (p-1) * take;
+
+                // * get the data
+                var preregisterPaginator = await this.preregisterService.GetPreregisters(take, skip);
+
+                ViewBag.LastUpdate = DateTime.Now;
+                ViewBag.TotalRecords = preregisterPaginator.Total;
+                ViewBag.TotalPages = Math.Ceiling( (decimal) (preregisterPaginator.Total / take) + 1);
+                ViewBag.CurrentPage = p;
+                ViewBag.Skip = skip;
+
+                return PartialView("~/Views/Preregister/Partials/RecordsTable.cshtml", preregisterPaginator.Data);
             }
             catch(Exception err)
             {

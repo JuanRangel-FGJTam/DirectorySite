@@ -10,25 +10,18 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace DirectorySite.Services
 {
-    public class PreregisterService(ILogger<PreregisterService> logger, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, PreregisterDataContext preregisterDataContext)
+    public class PreregisterService(ILogger<PreregisterService> logger, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
     {
         private readonly ILogger<PreregisterService> logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
         private readonly IHttpContextAccessor httpContextAccessor = httpContextAccessor;
 
-        private readonly PreregisterDataContext preregisterDataContext = preregisterDataContext;
-
-        
         private string authToken = string.Empty;
 
 
-        /// <summary>
-        ///  get the records from the api and save in memory
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token or id invalid</exception>
-        /// <exception cref="ArgumentException">The request is invalid</exception>
-        public async Task RefreshPreregisterRecords(){
+        public async Task<PreregisterPaginatorResponse> GetPreregisters(int take = 25, int skip = 0)
+        {
+
             // * load the authToken if is not loaded
             if(string.IsNullOrEmpty(authToken)){
                 RetriveAuthToken();
@@ -38,7 +31,7 @@ namespace DirectorySite.Services
             using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/pre-registration"),
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/pre-registration?take={take}&offset={skip}"),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
@@ -48,7 +41,9 @@ namespace DirectorySite.Services
             {
                 var httpResponse = await httpClient.SendAsync(httpRequest);
                 httpResponse.EnsureSuccessStatusCode();
-                preregisterDataContext.Preregisters = await httpResponse.Content.ReadFromJsonAsync<IEnumerable<PreregisterResponse>>() ?? [];
+
+                var tmpData = await httpResponse.Content.ReadFromJsonAsync<PreregisterPaginatorResponse>() ?? throw new Exception("Fail to parse the response");
+                return tmpData;
             }
             catch(HttpRequestException httpex)
             {
@@ -62,32 +57,45 @@ namespace DirectorySite.Services
             }
         }
 
-        /// <summary>
-        ///  get the records from the api and save in memory
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token or id invalid</exception>
-        /// <exception cref="ArgumentException">The request is invalid</exception>
-        public async Task<IEnumerable<PreregisterResponse>> GetPreregisterRecords()
+        public async Task<PreregisterResponse?> GetPreregisterByID(string recordID)
         {
-            if (!preregisterDataContext.DataIsValid)
-            {
-                await RefreshPreregisterRecords();
+            // * load the authToken if is not loaded
+            if(string.IsNullOrEmpty(authToken)){
+                RetriveAuthToken();
             }
-            return preregisterDataContext.Preregisters;
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/pre-registration/{recordID}"),
+                Method = HttpMethod.Get
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+            
+            // * send the request
+            try
+            {
+                var httpResponse = await httpClient.SendAsync(httpRequest);
+                httpResponse.EnsureSuccessStatusCode();
+
+                var tmpData = await httpResponse.Content.ReadFromJsonAsync<PreregisterResponse>() ?? throw new Exception("Fail to parse the response");
+                return tmpData;
+            }
+            catch(HttpRequestException httpex)
+            {
+                this.logger.LogError(httpex, "Fail at get the preregister records: {message}", httpex.Message);
+                throw httpex.StatusCode switch
+                {
+                    HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
+                    HttpStatusCode.BadRequest => new ArgumentException(),
+                    _ => new Exception(),
+                };
+            }
         }
 
-        public async Task<PreregisterResponse?> GetPreregisterRecord(string recordID)
-        {
-            if (!preregisterDataContext.DataIsValid)
-            {
-                await RefreshPreregisterRecords();
-            }
-            return preregisterDataContext.Preregisters.FirstOrDefault( item => item.Id == recordID);
-        }
-
-        #region  private methods
-
+        
+        #region private methods
         /// <summary>
         /// load the auth token
         /// </summary>
