@@ -93,6 +93,28 @@ namespace DirectorySite.Controllers
             }
         }
 
+
+        [HttpPost("{recordID}/delete/")]
+        public async Task<IActionResult> DeleteRecord([FromRoute] string recordID)
+        {
+
+            // * attempt to delete the record
+            try
+            {
+                await preregisterService.DeletePreregisterByID(recordID);
+                
+                return RedirectToAction("Index");
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err,"Fail at delete the preregister records");
+                var errorViewModel = new ErrorViewModel {
+                    RequestId = "Fail at retrive the data"
+                };
+                return View("~/Views/Shared/Error.cshtml", errorViewModel);
+            }
+        }
+
         #endregion
     }
 }

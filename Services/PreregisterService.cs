@@ -94,7 +94,41 @@ namespace DirectorySite.Services
             }
         }
 
-        
+        public async Task DeletePreregisterByID(string recordID)
+        {
+            // * load the authToken if is not loaded
+            if(string.IsNullOrEmpty(authToken)){
+                RetriveAuthToken();
+            }
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/pre-registration/{recordID}"),
+                Method = HttpMethod.Delete
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+            
+            // * send the request
+            try
+            {
+                var httpResponse = await httpClient.SendAsync(httpRequest);
+                httpResponse.EnsureSuccessStatusCode();
+                return;
+            }
+            catch(HttpRequestException httpex)
+            {
+                this.logger.LogError(httpex, "Fail at get the preregister records: {message}", httpex.Message);
+                throw httpex.StatusCode switch
+                {
+                    HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
+                    HttpStatusCode.BadRequest => new ArgumentException(),
+                    _ => new Exception(),
+                };
+            }
+        }
+
         #region private methods
         /// <summary>
         /// load the auth token
