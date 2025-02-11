@@ -26,12 +26,26 @@ function refreshData(event, force)
 
 function loadDataTable()
 {
-    $("#tableWrapper").load(`/Preregister/table-records`);
+    var args = [];
+    args.push(`p=${document.currentPage}`);
+    if(document.filterStatus > 0)
+    {
+        args.push(`filter=${document.filterStatus}`);
+    }
+    $("#tableWrapper").load(`/Preregister/table-records?${args.join('&')}`);
+
+    // * update the URL without reloading the page
+    history.pushState(null, "", `?${args.join('&')}`);
+}
+
+function goToPage(page)
+{
+    document.currentPage = Number(page);
+    loadDataTable();
 }
 
 jQuery(document).ready(()=>
-{
-    $("#updateRecordsButton").click(refreshData);
-    
-    loadDataTable();
-});
+    {
+        $("#updateRecordsButton").click(refreshData);
+        loadDataTable();
+    });

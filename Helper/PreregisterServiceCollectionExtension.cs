@@ -9,7 +9,6 @@ namespace DirectorySite.Helper
     {
         public static void AddPreregisterServices(this IServiceCollection services)
         {
-            services.AddSingleton<PreregisterDataContext>();
             services.AddScoped<PreregisterService>();
         }
     }

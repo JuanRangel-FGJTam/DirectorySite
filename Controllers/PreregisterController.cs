@@ -10,20 +10,21 @@ namespace DirectorySite.Controllers
 {
     [Auth]
     [Route("[controller]")]
-    public class PreregisterController(ILogger<PreregisterController> logger, PreregisterService preregisterService, PreregisterDataContext preregisterDataContext) : Controller
+    public class PreregisterController(ILogger<PreregisterController> logger, PreregisterService preregisterService) : Controller
     {
         private readonly ILogger<PreregisterController> _logger = logger;
         private readonly PreregisterService preregisterService = preregisterService;
-        private readonly PreregisterDataContext preregisterDataContext = preregisterDataContext;
+        
 
-
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery] int p = 1, [FromQuery] int filter = 0)
         {
             try
             {
-                IEnumerable<PreregisterResponse> responseData = await preregisterService.GetPreregisterRecords();
-                ViewBag.LastUpdate = preregisterDataContext.LastUpdate!.Value.ToString();
-                return View(responseData);
+                ViewBag.CurrentPage = p;
+                ViewBag.CurrentFilterStatus = filter;
+                var responseData = await preregisterService.GetPreregisters();
+                ViewBag.LastUpdate = DateTime.Now;
+                return View(responseData.Data);
             }
             catch(Exception err)
             {
@@ -43,7 +44,7 @@ namespace DirectorySite.Controllers
             PreregisterResponse? responseData = null;
             try
             {
-                responseData = await preregisterService.GetPreregisterRecord(recordID);
+                responseData = await preregisterService.GetPreregisterByID(recordID);
             }
             catch(Exception err)
             {
@@ -63,35 +64,50 @@ namespace DirectorySite.Controllers
             return View(responseData);
         }
 
-        [HttpPost("table-records/refresh")]
-        [Produces(MediaTypeNames.Application.Json)]
-        public async Task<IActionResult> ForceRefreshData()
-        {
-            try
-            {
-                await preregisterService.RefreshPreregisterRecords();    
-                return Ok( new {
-                    LastUpdate = this.preregisterDataContext.LastUpdate!.Value.ToString()
-                });
-            }
-            catch (System.Exception)
-            {
-                return Conflict();
-            }
-        }
-
         #region Partial views
         [Route("table-records")]
-        public async Task<IActionResult> GetTableRecords(){
+        public async Task<IActionResult> GetTableRecords([FromQuery] int p = 1, [FromQuery] int filter = 0){
             try
             {
-                IEnumerable<PreregisterResponse> responseData = await preregisterService.GetPreregisterRecords();
-                ViewBag.LastUpdate = preregisterDataContext.LastUpdate!.Value.ToString();
-                return PartialView("~/Views/Preregister/Partials/RecordsTable.cshtml", responseData);
+                int take = 25;
+                int skip = (p-1) * take;
+
+                // * get the data
+                var preregisterPaginator = await this.preregisterService.GetPreregisters(take, skip);
+
+                ViewBag.LastUpdate = DateTime.Now;
+                ViewBag.TotalRecords = preregisterPaginator.Total;
+                ViewBag.TotalPages = Math.Ceiling( (decimal) (preregisterPaginator.Total / take) + 1);
+                ViewBag.CurrentPage = p;
+                ViewBag.Skip = skip;
+
+                return PartialView("~/Views/Preregister/Partials/RecordsTable.cshtml", preregisterPaginator.Data);
             }
             catch(Exception err)
             {
                 this._logger.LogError(err,"Fail at retrive the preregister records");
+                var errorViewModel = new ErrorViewModel {
+                    RequestId = "Fail at retrive the data"
+                };
+                return View("~/Views/Shared/Error.cshtml", errorViewModel);
+            }
+        }
+
+
+        [HttpPost("{recordID}/delete/")]
+        public async Task<IActionResult> DeleteRecord([FromRoute] string recordID)
+        {
+
+            // * attempt to delete the record
+            try
+            {
+                await preregisterService.DeletePreregisterByID(recordID);
+                
+                return RedirectToAction("Index");
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err,"Fail at delete the preregister records");
                 var errorViewModel = new ErrorViewModel {
                     RequestId = "Fail at retrive the data"
                 };
