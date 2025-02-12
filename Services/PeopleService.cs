@@ -107,14 +107,29 @@ namespace DirectorySite.Services
             }
             catch(HttpRequestException httpEx)
             {
+                // * attempt to parse the response body
+                var errorMessage = string.Empty;
+                if(httpEx.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
+                {
+                    try
+                    {
+                        UpdatePersonGeneralsErrorResponse? errors = await response.Content.ReadFromJsonAsync<UpdatePersonGeneralsErrorResponse>();
+                        if(errors != null)
+                        {
+                            errorMessage = string.Join(", ", errors.Errors.SelectMany( kvp => kvp.Value));
+                        }
+                    }
+                    catch(Exception) { }
+                }
+
                 throw httpEx.StatusCode switch
                 {
-                    System.Net.HttpStatusCode.BadRequest => new ArgumentException(httpEx.Message, httpEx),
+                    System.Net.HttpStatusCode.UnprocessableEntity => new ArgumentException(errorMessage, httpEx),
+                    System.Net.HttpStatusCode.BadRequest => new ArgumentException( httpEx.Message, httpEx),
                     System.Net.HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
                     _ => new InvalidDataException(),
                 };
             }
-
             return 1;
         }
 
@@ -152,10 +167,8 @@ namespace DirectorySite.Services
                     _ => new InvalidDataException(),
                 };
             }
-
             return 1;
         }
-    
 
         /// <summary>
         /// 
@@ -170,9 +183,13 @@ namespace DirectorySite.Services
         {
             LoadAuthToken();
 
+            // * get the person
+            var personData = await this.GetPersonById(personID);
+
             // * prepare the payload
             var payload = JsonConvert.SerializeObject(new {
-                Email = newEmail
+                Email = newEmail,
+                Curp = personData?.Curp
             }, jsonSerializerSettings);
 
             // * prepare the request
@@ -193,19 +210,37 @@ namespace DirectorySite.Services
             }
             catch(HttpRequestException httpEx)
             {
+
+                // * attempt to parse the response body
+                var errorMessage = httpEx.Message;
+                if(httpEx.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
+                {
+                    try
+                    {
+                        UpdatePersonGeneralsErrorResponse? errors = await response.Content.ReadFromJsonAsync<UpdatePersonGeneralsErrorResponse>();
+                        if(errors != null)
+                        {
+                            errorMessage = string.Join(", ", errors.Errors.SelectMany( kvp => kvp.Value));
+                            this.logger.LogInformation("Text:" + errorMessage);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        this.logger.LogError(ex.Message);
+                    }
+                }
                 
                 throw httpEx.StatusCode switch
                 {
-                    System.Net.HttpStatusCode.BadRequest => new ArgumentException(httpEx.Message, httpEx),
+                    System.Net.HttpStatusCode.UnprocessableEntity => new ArgumentException(errorMessage, httpEx),
+                    System.Net.HttpStatusCode.BadRequest => new ArgumentException(errorMessage, httpEx),
                     System.Net.HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
-                    System.Net.HttpStatusCode.UnprocessableEntity => new ArgumentException("email", "Correo no valido o ya se encuentra ocupado."),
                     _ => new InvalidDataException(),
                 };
             }
 
             return 1;
         }
-
 
         private void LoadAuthToken()
         {
