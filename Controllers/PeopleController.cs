@@ -155,9 +155,11 @@ namespace DirectorySite.Controllers
             {
                 return Conflict();
             }
-            catch (ArgumentException)
+            catch (ArgumentException ae)
             {
-                return Conflict();
+                return BadRequest(new {
+                    ae.Message
+                });
             }
             catch (InvalidDataException)
             {
@@ -201,10 +203,11 @@ namespace DirectorySite.Controllers
             {
                 return Unauthorized();
             }
-            catch (ArgumentException a)
+            catch (ArgumentException ae)
             {
-                var cMessage = a.Message.Replace("email","").Replace("(","").Replace(")","").Trim();
-                return Conflict(cMessage);
+                return BadRequest(new {
+                    ae.Message
+                });
             }
             catch (InvalidDataException)
             {

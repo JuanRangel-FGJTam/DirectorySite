@@ -1,6 +1,5 @@
 function submitGeneralDataForm(event){
     event.preventDefault();
-      
     const form = $(this);
     const url = `/people/${currentPersonID}/generals`;
     const method = form.attr('method');
@@ -18,10 +17,25 @@ function submitGeneralDataForm(event){
                 location.href = `/people/${currentPersonID}`;
             });
         },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
+        error: function(xhr, status, error)
+        {
+            var message = "Error al actualizar los datos";
+            try
+            {
+                message = xhr.responseJSON.message;
+            }
+            catch (error)
+            {
+                //
+            }
+
+            if(xhr.status == 401)
+            {
+                message = "No authorizado"
+            };
+            
             Swal.fire({
-                title: "Error al actualizar los datos",
+                title: message,
                 icon: "error"
             });
         }
@@ -47,16 +61,23 @@ function submitContactForm(event){
                 location.href = `/people/${currentPersonID}`;
             });
         },
-        error: function(xhr, status, error) {
+        error: function(xhr, status, error)
+        {
             var message = "Error al actualizar los datos";
-            try {
-                message = xhr.responseText;
-            } catch (error) {
+            try
+            {
+                message = xhr.responseJSON.message;
             }
+            catch (error)
+            {
+                //
+            }
+
             if(xhr.status == 401)
             {
                 message = "No authorizado"
             };
+
             Swal.fire({
                 title: message,
                 icon: "error"
