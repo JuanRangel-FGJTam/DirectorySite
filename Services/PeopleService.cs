@@ -190,7 +190,8 @@ namespace DirectorySite.Services
             var payload = JsonConvert.SerializeObject(new {
                 Email = newEmail,
                 Curp = personData?.Curp,
-                Rfc = personData?.Rfc
+                Rfc = personData?.Rfc,
+                LastName = personData?.LastName
             }, jsonSerializerSettings);
 
             // * prepare the request
