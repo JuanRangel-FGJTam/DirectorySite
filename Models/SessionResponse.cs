@@ -23,6 +23,7 @@ namespace DirectorySite.Models
         public string? UserAgent { get; set; }
         public DateTime? BegginAt { get; set; }
         public DateTime? EndAt { get; set; }
+        public DateTime? DeletedAt { get; set; }
         public string? Token { get; set; }
     }
 

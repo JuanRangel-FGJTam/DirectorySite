@@ -48,7 +48,10 @@
                         </td>
                         <td>
                             <div class="d-flex align-items-center justify-content-center">
-                                <button type="button" class="close-session btn btn-secondary py-0 px-1" id="btn_@session.SessionID" onclick="handleCloseSesionButton(event)">Cerrar</button>
+                                @if(session.DeletedAt == null)
+                                {
+                                    <button type="button" class="close-session btn btn-secondary py-0 px-1" id="btn_@session.SessionID" onclick="handleCloseSesionButton(event)">Cerrar</button>
+                                }
                             </div>
                         </td>
                     </tr>

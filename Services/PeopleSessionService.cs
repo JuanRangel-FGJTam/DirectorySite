@@ -38,7 +38,7 @@ namespace DirectorySite.Services
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/session?personId={personID}&take={take}&skip={skip}"),
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/session?personId={personID}&take={take}&skip={skip}&withTrashed=1"),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
