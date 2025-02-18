@@ -1,4 +1,34 @@
 @model PersonResponse
+@functions
+{
+    IEnumerable<ContactInformationResponse>? GetContacInfo()
+    {
+        return Model.ContactInformation?.Where(item=>item.ContactTypeId != 1).ToList();
+    }
+
+    ContactInformationResponse GetPrincipalPhonenumber()
+    {
+        if(Model.ContactInformation == null || !Model.ContactInformation.Any())
+        {
+            return CreateDefaultContactInformationResponse();
+        }
+        if(Model.ContactInformation?.FirstOrDefault(item=> item.ContactTypeId == 1) == null)
+        {
+            return CreateDefaultContactInformationResponse();
+        }
+        return Model.ContactInformation!.FirstOrDefault(item=> item.ContactTypeId == 1)!;
+    }
+
+    private ContactInformationResponse CreateDefaultContactInformationResponse()
+    {
+        return new ContactInformationResponse
+        {
+            ContactId = string.Empty,
+            ContactTypeId = 1,
+            Value = string.Empty
+        };
+    }
+}
 <div class="container rounded bg-white">
     <div class="row">
         <!-- Sidebar Picture box -->
@@ -85,9 +115,14 @@
 
                 <div class="col-12 my-1"></div>
 
-                @if(Model.ContactInformation != null)
+                <div class="mb-2 col-md-12">
+                    <label class="label">Telefono principal</label>
+                    <input type="text" class="form-control" disabled value="@GetPrincipalPhonenumber().Value">
+                </div>
+
+                @if(GetContacInfo() != null)
                 {
-                    foreach(var element in Model.ContactInformation){
+                    foreach(var element in GetContacInfo()!){
                         <div class="col-md-6">
                             <label class="label text-capitalize">@element.ContactTypeName?.ToLower()</label>
                             <input type="text" class="form-control" disabled value="@element.Value">
