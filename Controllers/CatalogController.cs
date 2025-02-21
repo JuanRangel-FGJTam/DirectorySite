@@ -289,7 +289,6 @@ namespace DirectorySite.Controllers
             }
         }
 
-
         [HttpPost]
         [Route("occupations")]
         public JsonResult StoreNewOccupation([FromForm] string? name){
@@ -300,6 +299,36 @@ namespace DirectorySite.Controllers
             return Json( new {
                 Message = "Elemento registrado " + name
             });
+        }
+    
+        [HttpGet("SearchZipcode")]
+        public async Task<IActionResult> SearchZipcode(int? zipcode)
+        {
+            ViewData["Title"] = "Catalogo - Codigo Postal";
+            ViewData["ActivePage"] = "Codigo Postal";
+
+            if(zipcode == null)
+            {
+                return View();
+            }
+
+            // * search th code data
+            try
+            {
+                var searchResult = await this.catalogService.SearchZipcode(zipcode.Value);
+                return View(searchResult);
+            }
+            catch(KeyNotFoundException knfe)
+            {
+                ViewBag.WarningMessage = knfe.Message;
+                return View();
+            }
+            catch(Exception ex)
+            {
+                this._logger.LogError(ex, "Fail at get the data");
+                ViewBag.ErrorMessage = ex.Message;
+                return View();
+            }
         }
     }
 }
