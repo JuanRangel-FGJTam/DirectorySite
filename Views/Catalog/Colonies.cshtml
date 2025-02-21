@@ -9,7 +9,7 @@
         </div>
 
         <div class="col-10">
-           <form asp-action="Colonies" method="get" id="formFilters" class="d-flex align-items-center  border rounded px-2 py-1 mb-2">
+            <form asp-action="Colonies" method="get" id="formFilters" class="d-flex align-items-center border rounded px-2 py-1 mb-2">
                 <select id="selectCountry" asp-for="CountryId" asp-items="@(Model.CountriesCatalog)" class="form-select-sm mr-1 me-1" style="max-width: 16rem;">
                     <option value="0">Seleccione un elemento</option>
                 </select>
@@ -32,6 +32,7 @@
                         <th scope="col">#</th>
                         <th scope="col">Id</th>
                         <th scope="col">Name</th>
+                        <th scope="col">zipcode</th>
                         <th scope="col">Actions</th>
                         </tr>
                     </thead>
@@ -43,6 +44,7 @@
                                     <th scope="row">@i</th>
                                     <td>@item.Id</td>
                                     <td>@item.Name</td>
+                                    <td>@item.ZipCode</td>
                                     <td>
                                         @*
                                         <a href="#" class="btn btn-sm" tabindex="-1" role="button" aria-disabled="true">
@@ -85,7 +87,7 @@
             @Html.TextBoxFor(item => item.StateName, new { @class="form-control", @disabled="true"})
         </div>
 
-         <div class="mb-2">
+        <div class="mb-2">
             <label for="new-element-country" class="col-form-label">Municipio</label>
             @Html.TextBoxFor(item => item.MunicipalityId, new { @class="form-control", @hidden="true"})
             @Html.TextBoxFor(item => item.MunicipalityName, new { @class="form-control", @disabled="true"})
