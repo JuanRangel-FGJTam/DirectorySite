@@ -280,7 +280,7 @@ namespace DirectorySite.Services
 
         public async Task<int> StoreNewColony(int countryId, int stateId, int municipalityId, string name, int zipCode)
         {
-            var payload =  new {
+            var payload = new {
                 CountryId = countryId,
                 StateId = stateId,
                 MunicipalityId = municipalityId,
@@ -288,7 +288,7 @@ namespace DirectorySite.Services
                 ZipCode = zipCode.ToString()
             };
 
-            var jsonPayload  = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
             this.logger.LogCritical(jsonPayload);
             
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
@@ -302,6 +302,35 @@ namespace DirectorySite.Services
             var httpResponse = await httpClient.SendAsync(httpRequest);
             httpResponse.EnsureSuccessStatusCode();
             return 1;
+        }
+
+        
+        /// <summary>
+        ///  search zipcode on the system
+        /// </summary>
+        /// <param name="zipcode">zipcode to search</param>
+        /// <returns></returns>
+        /// <exception cref="KeyNotFoundException">The zipcode was not found</exception>
+        public async Task<SearchZipcodeResponse> SearchZipcode(int zipcode)
+        {
+            using HttpClient httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + AuthToken );
+            var httpResponse = await httpClient.GetAsync($"/api/zipcode/search?zipcode={zipcode}");
+
+            // * validate response
+            if(httpResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new KeyNotFoundException("No hay resultados para este codigo postal.");
+            }
+
+            if( httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                httpResponse.EnsureSuccessStatusCode();
+            }
+
+            // * process the response
+            var response = await httpResponse.Content.ReadFromJsonAsync<SearchZipcodeResponse>();
+            return response ?? throw new Exception("Error al buscar el codigo postal.");
         }
 
     }

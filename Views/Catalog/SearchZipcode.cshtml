@@ -1,0 +1,128 @@
+﻿@model DirectorySite.Models.SearchZipcodeResponse?
+
+<partial name="./Partials/PageHeader" />
+
+<div class="fluid-container ">
+    <div class="row align-items-start">
+        <div class="col-2">
+            <partial name="./Partials/CatalogSidebar"/>
+        </div>
+
+        <div class="col-10">
+            <div class="borded rounded bg-white d-flex align-items-center">
+                <form asp-action="SearchZipcode" method="get" class="d-flex align-items-center  border rounded px-2 py-1 mb-2">
+                    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" class="DocSearch-Search-Icon">
+                        <path d="M14.386 14.386l4.0877 4.0877-4.0877-4.0877c-2.9418 2.9419-7.7115 2.9419-10.6533 0-2.9419-2.9418-2.9419-7.7115 0-10.6533 2.9418-2.9419 7.7115-2.9419 10.6533 0 2.9419 2.9418 2.9419 7.7115 0 10.6533z" stroke="currentColor" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <input type="number" asp-for="@Model.Zipcode" class="searchInput"/>
+                </form>
+            </div>
+
+            @if(!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ViewBag.ErrorMessage
+                </div>
+            }
+
+            @if(!string.IsNullOrEmpty(ViewBag.WarningMessage))
+            {
+                <div class="alert alert-warning" role="alert">
+                    @ViewBag.WarningMessage
+                </div>
+            }
+
+            @if(Model == null)
+            {
+                <table class="table table-sm table-striped">
+                    <tbody>
+                        <tr>
+                            <th class="px-2" style="width: 33%; font-size: .9rem;"> Codigo Postal</th>
+                            <th class="px-2" style="width: 33%; font-size: .9rem;">Municipio</th>
+                            <th class="px-2" style="width: 33%; font-size: .9rem;">Colonia</th>
+                        </tr>
+                        <tr class="table-light">
+                            <td colspan="3">
+                                <div class="rounded p-4 d-flex flex-column align-items-center justify-content-around">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="mr-1" viewBox="0 0 24 24">
+                                        <g fill="none" stroke="#666666" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13h3l3 3h4l3-3h3"/></g>
+                                    </svg>
+                                    <h6 class="text-muted">Sin Datos</h6>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="border rounded table-responsive" id="accordionExample">
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                        @foreach(var paisData in Model!.Results)
+                        {
+                            <tr class="table-light">
+                                <td class="text-center fw-bold text-muted">@paisData.CountryName</td>
+                            </tr>
+                            <tr>
+                                <td class="p-0">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                            @foreach(var estadoData in paisData.States)
+                                            {
+                                                <tr>
+                                                    <td class="p-0">
+                                                        <button class="accordion-button py-2" type="button" data-bs-toggle="collapse" data-bs-target="@($"#collapseState{estadoData.StateId}")" aria-expanded="true" aria-controls="collapseOne">
+                                                            @estadoData.StateName
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div id="@($"collapseState{estadoData.StateId}")" class="accordion-collapse collapse show">
+                                                            <table class="table table-sm table-striped table-borderless mb-0">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <th class="px-2" style="width: 33%; font-size: .9rem;"> Codigo Postal</th>
+                                                                        <th class="px-2" style="width: 33%; font-size: .9rem;">Municipio</th>
+                                                                        <th class="px-2" style="width: 33%; font-size: .9rem;">Colonia</th>
+                                                                    </tr>
+                                                                    @foreach(var municipalityData in estadoData.Data)
+                                                                    {
+                                                                        <tr>
+                                                                            <td class="px-4"> @municipalityData.ZipCode </td>
+                                                                            <td class="px-4"> @municipalityData.Municipality </td>
+                                                                            <td class="px-4"> @municipalityData.ColonyName</td>
+                                                                        </tr>
+                                                                    }
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .searchInput
+    {
+        border:none;
+    }
+    .searchInput:focus-visible
+    {
+        outline: none;
+        box-shadow: none;
+        border-color: inherit;
+    }
+</style>
