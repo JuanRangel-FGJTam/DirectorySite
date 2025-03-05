@@ -145,6 +145,11 @@ namespace DirectorySite.Controllers
                 });
             }
 
+            // * prevent null data
+            request.Curp = request.Curp ?? string.Empty;
+            request.Rfc = request.Rfc ?? string.Empty;
+            request.LastName = request.LastName ?? string.Empty;
+
             // * update the person
             try
             {
