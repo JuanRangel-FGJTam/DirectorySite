@@ -15,7 +15,7 @@ namespace DirectorySite.Controllers
         private readonly RecoveryAccountService recoveryAccountService = recoveryAccountService;
         private readonly PeopleSearchService peopleSearchService = ps;
 
-        public IActionResult Index([FromQuery] int p = 1, [FromQuery] int filter = 0)
+        public IActionResult Index([FromQuery] int p = 1, [FromQuery] int filter = 1)
         {
             ViewBag.CurrentPage = p;
             ViewBag.CurrentFilterStatus = filter;
