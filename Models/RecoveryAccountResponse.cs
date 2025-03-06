@@ -120,6 +120,12 @@ namespace DirectorySite.Models;
 
         [JsonPropertyName("userDeletedId")]
         public int? UserDeletedId { get; set; }
+        
+        [JsonPropertyName("emailNotificationResponse")]
+        public string? EmailNotificationResponse { get; set; }
+
+        [JsonPropertyName("emailNotificationContent")]
+        public string? EmailNotificationContent { get; set; }
 
 
         public string FullName {
