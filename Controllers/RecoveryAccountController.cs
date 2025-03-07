@@ -15,7 +15,7 @@ namespace DirectorySite.Controllers
         private readonly RecoveryAccountService recoveryAccountService = recoveryAccountService;
         private readonly PeopleSearchService peopleSearchService = ps;
 
-        public IActionResult Index([FromQuery] int p = 1, [FromQuery] int filter = 0)
+        public IActionResult Index([FromQuery] int p = 1, [FromQuery] int filter = 1)
         {
             ViewBag.CurrentPage = p;
             ViewBag.CurrentFilterStatus = filter;
@@ -26,6 +26,18 @@ namespace DirectorySite.Controllers
         [HttpGet("{recordID}")]
         public async Task<IActionResult> Show(string recordID)
         {
+            // * get catalog of templates
+            IEnumerable<RecoveryAccountTemplate> templates = [];
+            try
+            {
+                templates = await this.recoveryAccountService.GetTemplates();
+            }
+            catch(UnauthorizedAccessException)
+            {
+                return RedirectToAction("Login", "Authentication");
+            }
+            ViewBag.Templates = templates ?? Array.Empty<RecoveryAccountTemplate>();
+
             try
             {
                 var record = await this.recoveryAccountService.GetRequestById(recordID);
@@ -52,7 +64,7 @@ namespace DirectorySite.Controllers
 
         [HttpPatch("{recordID}")]
         [Produces(MediaTypeNames.Application.Json)]
-        public async Task<IActionResult> FinishRequest([FromRoute] string recordID, [FromForm] string comments, [FromForm] bool notifyEmail = false)
+        public async Task<IActionResult> FinishRequest([FromRoute] string recordID, [FromForm] string comments, [FromForm] bool notifyEmail = false, [FromForm] int templateId = 0)
         {
             RecoveryAccountResponse recoveryRecord;
             try
@@ -71,40 +83,10 @@ namespace DirectorySite.Controllers
             // * update the request
             try
             {
-                await this.recoveryAccountService.UpdateTheRequest(recordID, comments, notifyEmail);
+                await this.recoveryAccountService.UpdateTheRequest(recordID, comments, notifyEmail, templateId);
                 return RedirectToAction("index", "RecoveryAccount");
 
             }catch(Exception)
-            {
-                return BadRequest();
-            }
-        }
-
-        [HttpDelete("{recordID}")]
-        [Produces(MediaTypeNames.Application.Json)]
-        public async Task<IActionResult> DeleteRequest([FromRoute] string recordID, [FromForm] string comments, [FromForm] bool notifyEmail = false)
-        {
-            RecoveryAccountResponse recoveryRecord;
-            try
-            {
-                recoveryRecord = await this.recoveryAccountService.GetRequestById(recordID);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (Exception)
-            {
-                return Conflict();
-            }
-
-            // * update the request
-            try
-            {
-                await this.recoveryAccountService.DeleteTheRequest(recordID, comments, notifyEmail);
-                return RedirectToAction("index", "RecoveryAccount");
-            }
-            catch(Exception)
             {
                 return BadRequest();
             }

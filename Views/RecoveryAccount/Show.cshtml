@@ -20,7 +20,7 @@
 }
 
 <div class="d-flex align-items-baseline mb-2">
-    <h1 class="display-6 d-flex align-items-baseline">
+    <h1 id="solicitud" class="display-6 d-flex align-items-baseline">
         @ViewBag.Title
     </h1>
     <div class="ms-auto">
@@ -164,11 +164,10 @@
 </div>
 
 
-<div class="container border border-2 rounded @(GetBorderColor()) rounded mt-4 mb-2 p-3">
-
+<div class="container border border-2 rounded @(GetBorderColor()) rounded mt-4 mb-2 p-4">
     <form id="finishRequestForm" class="row" method="post">
-        <div class="col-12 border-bottom mb-2">
-            <h4>Respuesta</h4>
+        <div class="col-12 border-bottom mb-2"> 
+            <h4 id="respuesta">Respuesta</h4>
         </div>
 
         @if(edition)
@@ -181,6 +180,22 @@
         </div>
         }
 
+        @if(edition)
+        {
+        <div class="col-12 mb-2">
+            <label class="form-check-label" for="template">
+                Template de respuesta
+            </label>
+                <select id="template" class="form-control">
+                    <option selected disabled>Seleccione un elemento</option>
+                    @foreach(var t in ViewBag.Templates)
+                    {
+                        <option value="@t.Id">@t.Label</option>
+                    }
+                </select>
+        </div>
+        }
+
         <div class="col-12">
             <label class="label fs-6">Comentarios</label>
             <textarea id="txtComments" type="text" class="form-control" rows="4" disabled="@(!edition)">@Model.ResponseComments</textarea>
@@ -189,8 +204,8 @@
         @if(edition)
         {
             <div class="col-12 d-flex justify-content-between pt-4">
-                <button id="btn-finish" type="button" class="btn btn-success">Concluir Solicitud</button>
-                <button id="btn-cancel" type="button" class="btn btn-danger">Cancelar Solicitud</button>
+                <button id="btn-back" type="button" class="btn btn-secondary" style="width:8rem;">Regresar</button>
+                <button id="btn-finish" type="button" class="btn btn-success" style="width:8rem;">Concluir</button>
             </div>
         }
 
@@ -214,12 +229,26 @@
             </div>
         }
 
+        @if(!string.IsNullOrEmpty(Model.EmailNotificationContent))
+        {
+            <label class="label fs-6 py-1 mt-1">Correo de respuesta:</label>
+            <div class="border rounded p-2 bg-white shadow-sm" style="color: #333; font-family: monospace; min-height: 6rem;">
+                @Html.Raw(Model.EmailNotificationContent)
+            </div>
+        }
+
+        @if(!string.IsNullOrEmpty(Model.EmailNotificationResponse))
+        {
+            <label class="label fs-6 py-1 mt-1">Estatus Envio:</label>
+            <div class="border rounded p-2 bg-white shadow-sm" style="color: #333; font-family: monospace; min-height: 4rem;">
+                @Model.EmailNotificationResponse
+            </div>
+        }
+
     </form>
 </div>
 
-
 @section scripts {
-    
     <script>
         let currentRequestID = '@Html.Raw(Model.Id)';
 
@@ -230,11 +259,21 @@
             const method = 'PATCH';
             const messageText = $('#txtComments').val();
             const notifyEmail = $('#notifyEmail').is(':checked');
-            
+            const templateId = $('#template').val();
+            if(templateId == undefined)
+            {
+                Swal.fire({
+                    title: "Seleccione un template de respuesta",
+                    icon: "warning"
+                });
+                return;
+            }
+
             // Create a FormData object
             var formData = new FormData();
             formData.append('comments', messageText);
             formData.append('notifyEmail', notifyEmail);
+            formData.append('templateId', templateId);
 
             $.ajax({
                 url: url,
@@ -260,47 +299,15 @@
             });
         }
         
-        function cancelRequest()
+        function goBackClick()
         {
-            const form = $(this);
-            const url = `/RecoveryAccount/${currentRequestID}`;
-            const method = 'DELETE';
-            const messageText = $('#txtComments').val();
-            const notifyEmail = $('#notifyEmail').is(':checked');
-            
-            // Create a FormData object
-            var formData = new FormData();
-            formData.append('comments', messageText);
-            formData.append('notifyEmail', notifyEmail);
-
-            $.ajax({
-                url: url,
-                type: method,
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    Swal.fire({
-                        title: "Solicitud cancelada",
-                        icon: "success"
-                    }).then((result) => {
-                        window.location.href = "/recoveryAccount";
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        title: "Error al realizar la peticion",
-                        icon: "error"
-                    });
-                }
-            });
+            window.location.replace("@Url.Action("Index", "RecoveryAccount")");
         }
 
         jQuery(document).ready(()=>
         {
             $("#btn-finish").on("click", finishRequest);
-            $("#btn-cancel").on("click", cancelRequest);
+            $("#btn-back").on("click", goBackClick);
             $("#table-coincidences").load(`/RecoveryAccount/people-coincidence?recordID=${currentRequestID}`);
         });
     </script>

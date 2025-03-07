@@ -5,12 +5,12 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Serialization;
-using DirectorySite.Data;
-using DirectorySite.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
+using DirectorySite.Data;
+using DirectorySite.Models;
 
 namespace DirectorySite.Services
 {
@@ -144,7 +144,7 @@ namespace DirectorySite.Services
         /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token or id invalid</exception>
         /// <exception cref="ArgumentException">The request is invalid</exception>
         /// <exception cref="KeyNotFoundException"></exception>
-        public async Task<int> UpdateTheRequest(string requestId, string comments, bool notifyEmail)
+        public async Task<int> UpdateTheRequest(string requestId, string comments, bool notifyEmail, int templateId)
         {
             // * load the authToken if is not loaded
             if(string.IsNullOrEmpty(authToken)){
@@ -154,7 +154,8 @@ namespace DirectorySite.Services
             // * prepare the payload
             var payloadRequest = JsonConvert.SerializeObject( new {
                 ResponseComments = comments,
-                NotifyEmail = notifyEmail ? 1 :0
+                NotifyEmail = notifyEmail ? 1 :0,
+                TemplateId = templateId
             });
 
             // * prepare the request
@@ -187,33 +188,21 @@ namespace DirectorySite.Services
             }
         }
 
-        /// <summary>
-        /// return the recovery requests info with files 
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="UnauthorizedAccessException"> Fail at attempt to get the auth token or id invalid</exception>
-        /// <exception cref="ArgumentException">The request is invalid</exception>
-        /// <exception cref="KeyNotFoundException"></exception>
-        public async Task<int> DeleteTheRequest(string requestId, string comments, bool notifyEmail)
+        public async Task<IEnumerable<RecoveryAccountTemplate>> GetTemplates()
         {
+            var responseList = new List<RecoveryAccountTemplate>();
+
             // * load the authToken if is not loaded
             if(string.IsNullOrEmpty(authToken)){
                 RetriveAuthToken();
             }
-
-            // * prepare the payload
-            var payloadRequest = JsonConvert.SerializeObject( new {
-                ResponseComments = comments,
-                NotifyEmail = notifyEmail ? 1 :0
-            });
-
+            
             // * prepare the request
             using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/accountRecovery/{requestId}"),
-                Method = HttpMethod.Delete,
-                Content = new StringContent(payloadRequest, Encoding.UTF8, "application/json")
+                RequestUri = new Uri(httpClient.BaseAddress!, "/api/AccountRecovery/templates"),
+                Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
             
@@ -222,7 +211,9 @@ namespace DirectorySite.Services
             {
                 var httpResponse = await httpClient.SendAsync(httpRequest);
                 httpResponse.EnsureSuccessStatusCode();
-                return 1;
+                
+                responseList = await httpResponse.Content.ReadFromJsonAsync<List<RecoveryAccountTemplate>>()
+                    ?? throw new KeyNotFoundException("The recovery request was not found");
             }
             catch(HttpRequestException httpex)
             {
@@ -235,9 +226,10 @@ namespace DirectorySite.Services
                     _ => new Exception(),
                 };
             }
+
+            return responseList;
         }
 
-        
         #region private methods
 
         /// <summary>
