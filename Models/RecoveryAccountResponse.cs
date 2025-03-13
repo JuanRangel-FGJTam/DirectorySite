@@ -127,6 +127,21 @@ namespace DirectorySite.Models;
         [JsonPropertyName("emailNotificationContent")]
         public string? EmailNotificationContent { get; set; }
 
+        [JsonPropertyName("occupationName")]
+        public string? OccupationName { get; set; }
+
+        [JsonPropertyName("occupationId")]
+        public int? OccupationId { get; set; }
+
+        [JsonPropertyName("maritalStatusName")]
+        public string? MaritalStatusName { get; set; }
+
+        [JsonPropertyName("maritalStatusId")]
+        public int? MaritalStatusId { get; set; }
+
+        [JsonPropertyName("rfc")]
+        public string? Rfc { get; set; }
+
 
         public string FullName {
             get {
