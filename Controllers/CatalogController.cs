@@ -293,12 +293,10 @@ namespace DirectorySite.Controllers
         [Route("occupations")]
         public JsonResult StoreNewOccupation([FromForm] string? name){
             throw new NotImplementedException();
-            
-            // there is no endpoint on the API for store a new catalog element
-
-            return Json( new {
-                Message = "Elemento registrado " + name
-            });
+            // * there is no endpoint on the API for store a new catalog element
+            // return Json( new {
+            //     Message = "Elemento registrado " + name
+            // });
         }
     
         [HttpGet("SearchZipcode")]
@@ -330,5 +328,77 @@ namespace DirectorySite.Controllers
                 return View();
             }
         }
+    
+        #region Document Types
+        [Route("document-types")]
+        public async Task<IActionResult> DocumentTypes()
+        {
+            var data = await catalogService.GetDocumentTypes();
+            return View(data);
+        }
+        
+        [HttpDelete("document-types/{documentTypeId}")]
+        public async Task<IActionResult> DeleteDocumentType([FromRoute] int documentTypeId)
+        {
+            try
+            {
+                await this.catalogService.DeleteDocumentType(documentTypeId);
+                return Ok();
+            }
+            catch(Exception err)
+            {
+                return BadRequest(err.Message);
+            }
+        }
+
+        [HttpGet("document-types/new")]
+        public IActionResult CreateDocumentType()
+        {
+            return View("DocumentTypeNew");
+        }
+
+        [HttpPost("document-types")]
+        public async Task<IActionResult> StoreDocumentType(DocumentType model)
+        {
+            try
+            {
+                await this.catalogService.StoreDocumentType(model.Name);
+            }
+            catch(Exception err)
+            {
+                ViewBag.ErrorMessage = err.Message;
+                return View("DocumentTypeNew", model);
+            }
+            return RedirectToAction("DocumentTypes");
+        }
+
+        [HttpGet("document-types/{documentTypeId}")]
+        public async Task<IActionResult> EditDocumentType([FromRoute] int documentTypeId)
+        {
+            var model = (await this.catalogService.GetDocumentTypes())?.FirstOrDefault(item => item.Id == documentTypeId);
+            if(model == null)
+            {
+                return RedirectToAction("CreateDocumentType");
+            }
+
+            return View("DocumentTypeEdit", model);
+        }
+        
+        [HttpPost("document-types/{documentTypeId}")]
+        public async Task<IActionResult> UpdateDocumentType([FromRoute] int documentTypeId, DocumentType model)
+        {
+            try
+            {
+                await this.catalogService.UpdateDocumentType(documentTypeId, model.Name);
+            }
+            catch(Exception err)
+            {
+                ViewBag.ErrorMessage = err.Message;
+                return View("DocumentTypeEdit", model);
+            }
+            return RedirectToAction("DocumentTypes");
+        }
+
+        #endregion
     }
 }
