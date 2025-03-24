@@ -10,6 +10,9 @@
                     <th scope="col">Folio</th>
                     <th scope="col">Estatus</th>
                     <th scope="col">Area</th>
+                    <th scope="col">Id Denuncia</th>
+                    <th scope="col">Observaciones</th>
+                    <th scope="col">Oficina</th>
                     <th scope="col" class="text-center">Fecha</th>
                 </tr>
             </thead>
@@ -24,6 +27,11 @@
                         <td>@pro.Folio</td>
                         <td>@pro.Status</td>
                         <td>@pro.Area</td>
+                        <td>@pro.DenunciaId</td>
+                        <td>
+                            <p>@pro.Observations</p>
+                        </td>
+                        <td>@pro.OfficeLocation</td>
                         <td>
                             <div class="flex flex-column align-items-center text-center">
                                 @if(pro.CreatedAt == null)

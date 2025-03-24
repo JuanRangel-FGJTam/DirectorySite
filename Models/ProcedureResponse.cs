@@ -44,5 +44,8 @@ namespace DirectorySite.Models
 
         [JsonPropertyName("files")]
         public List<object>? Files { get; set; }
+
+        [JsonPropertyName("officeLocation")]
+        public string? OfficeLocation { get; set; }
     }
 }
