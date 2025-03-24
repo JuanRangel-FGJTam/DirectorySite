@@ -12,7 +12,7 @@ namespace DirectorySite.Models
     {
         public string? PersonId { get; set; }
         
-        [Display(Name = "Correo Principal")]
+        [Display(Name = "Correo")]
         public string? Email { get; set; }
 
 
