@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
 
@@ -150,7 +151,7 @@ namespace DirectorySite.Models;
         }
         public string BirthdateFormated {
             get {
-                return BirthDate.ToString("dd MMMM yyyy");
+                return BirthDate.ToString("dd MMMM yyyy", new CultureInfo("es-MX"));
             }
         }
     }
