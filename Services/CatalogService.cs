@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication;
 using DirectorySite.Models;
+using Newtonsoft.Json.Linq;
 
 namespace DirectorySite.Services
 {
-    public class CatalogService( ILogger<CatalogService> logger,  IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor )
+    public class CatalogService(ILogger<CatalogService> logger,  IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
     {
         #region Fields
         private readonly ILogger<CatalogService> logger = logger;
@@ -258,7 +259,7 @@ namespace DirectorySite.Services
 
         public async Task<int> StoreNewMunicipality(int countryId, int stateId, string name)
         {
-            var payload =  new {
+            var payload = new {
                 CountryId = countryId,
                 StateId = stateId,
                 Name = name
@@ -289,7 +290,6 @@ namespace DirectorySite.Services
             };
 
             var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
-            this.logger.LogCritical(jsonPayload);
             
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
@@ -333,5 +333,162 @@ namespace DirectorySite.Services
             return response ?? throw new Exception("Error al buscar el codigo postal.");
         }
 
+
+        public async Task<IEnumerable<DocumentType>?> GetDocumentTypes()
+        {
+
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/document-types"),
+                Method = HttpMethod.Get
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            
+            var httpResponse = await httpClient.SendAsync( httpRequest );
+
+            if( httpResponse.IsSuccessStatusCode ){
+                var data = await httpResponse.Content.ReadFromJsonAsync<IEnumerable<DocumentType>>();
+                return data;
+            }
+
+            this.logger.LogError("Error at get catalog of ContactTypes {code}", httpResponse.StatusCode);
+            return null;
+        }
+
+        public async Task DeleteDocumentType(int documentTypeId)
+        {
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/document-types/{documentTypeId}"),
+                Method = HttpMethod.Delete
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            
+            var httpResponse = await httpClient.SendAsync(httpRequest);
+            if(httpResponse.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            // * process the response
+            if(httpResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new KeyNotFoundException("El tipo de documento no existe.");
+            }
+
+            // * attempt to cast the response
+            var errorMessage = "No se puede eliminar el tipo de documento.";
+            try
+            {
+                var responseMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(await httpResponse.Content.ReadAsStringAsync());
+                var errorsMessageList = GetAllValues(responseMessage!.errors);
+                errorMessage = string.Join(",", errorsMessageList);
+            }
+            catch (System.Exception)
+            {
+                errorMessage = "No se puede eliminar el tipo de documento.";
+            }
+            throw new Exception(errorMessage);
+        }
+
+        public async Task StoreDocumentType(string name)
+        {
+            var payload = new {
+                Name = name
+            };
+
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/document-types"),
+                Method = HttpMethod.Post,
+                Content = JsonContent.Create(payload)
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            var httpResponse = await httpClient.SendAsync(httpRequest);
+            if(httpResponse.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            // * attempt to cast the response
+            var errorMessage = "No se puede registrar el tipo de documento.";
+            try
+            {
+                var responseMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(await httpResponse.Content.ReadAsStringAsync());
+                var errorsMessageList = GetAllValues(responseMessage!.errors);
+                errorMessage = string.Join(",", errorsMessageList);
+            }
+            catch (System.Exception)
+            {
+                errorMessage = "No se puede registrar el tipo de documento.";
+            }
+            throw new Exception(errorMessage);
+
+        }
+
+        public async Task UpdateDocumentType(int documentTypeId, string name)
+        {
+            var payload = new {
+                Name = name
+            };
+
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/document-types/{documentTypeId}"),
+                Method = HttpMethod.Patch,
+                Content = JsonContent.Create(payload)
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            var httpResponse = await httpClient.SendAsync(httpRequest);
+            if(httpResponse.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            // * attempt to cast the response
+            try
+            {
+                var responseMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>( await httpResponse.Content.ReadAsStringAsync());
+                var errorsMessage = (IDictionary<string, string>) responseMessage!.errror;
+                throw new Exception( string.Join(",", errorsMessage.Values) );
+            }
+            catch (System.Exception)
+            {
+                throw new Exception("No se puede actualizar el tipo de documento");
+            }
+        }
+
+
+        static List<string> GetAllValues(JToken token)
+        {
+            List<string> values = new List<string>();
+
+            // Recursively process the JToken
+            if (token is JObject jObject)
+            {
+                foreach (var property in jObject.Properties())
+                {
+                    values.AddRange(GetAllValues(property.Value));
+                }
+            }
+            else if (token is JArray jArray)
+            {
+                foreach (var item in jArray)
+                {
+                    values.AddRange(GetAllValues(item));
+                }
+            }
+            else
+            {
+                // Add primitive values (like string, number, etc.)
+                values.Add(token.ToString());
+            }
+
+            return values;
+        }
     }
 }
