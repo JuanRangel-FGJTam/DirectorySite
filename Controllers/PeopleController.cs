@@ -11,13 +11,14 @@ using DirectorySite.Data;
 using DirectorySite.Models;
 using DirectorySite.Services;
 using DirectorySite.Models.ViewModel;
+using DirectorySite.Core;
 
 namespace DirectorySite.Controllers
 {
 
     [Auth]
     [Route("[controller]")]
-    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService, PeopleProcedureService _peopleProcedureService, CatalogService _catalogService) : Controller
+    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService, PeopleProcedureService _peopleProcedureService, CatalogService _catalogService, IPeopleDocumentService peopleDocumentService) : Controller
     {
         private readonly ILogger<PeopleController> _logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
@@ -27,6 +28,7 @@ namespace DirectorySite.Controllers
         private readonly PeopleSessionService peopleSessionService = _peopleSessionService;
         private readonly PeopleProcedureService peopleProcedureService = _peopleProcedureService;
         private readonly CatalogService catalogService = _catalogService;
+        private readonly IPeopleDocumentService peopleDocumentService = peopleDocumentService;
 
         public async Task<IActionResult> Index([FromQuery] string? search)
         {
@@ -253,6 +255,32 @@ namespace DirectorySite.Controllers
                 this._logger.LogError(err, "Fail at get the procedures data of the person '{personId}'", personID);
                 ViewData["ErrorTitle"] = "Error al obtener los procedimientos del usuario";
                 ViewData["ErrorMessage"] = "Hubo un error al obtener las procedimientos del usuario, intente de nuevo o comuníquese con un administrador.";
+                return PartialView("~/Views/Shared/ErrorAlert.cshtml", new ErrorViewModel());
+            }
+        }
+
+        [HttpGet]
+        [Route("{personID}/documents")]
+        public async Task<IActionResult> GetDocummentsPartialView([FromRoute] string personID)
+        {
+            IEnumerable<PersonDocumentResponse> personDocuments = [];
+            try
+            {
+                personDocuments = await this.peopleDocumentService.GetPeopleDocuments(Guid.Parse(personID));
+                if(personDocuments.Any())
+                {
+                    personDocuments = personDocuments
+                        .GroupBy(item => item.DocumentTypeId)
+                        .Select( g => g.OrderByDescending(i => i.CreatedAt).First())
+                        .ToArray();
+                }
+                return PartialView("~/Views/People/Partials/PersonDocuments.cshtml", personDocuments);
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the documents of the person '{personId}'", personID);
+                ViewData["ErrorTitle"] = "Error al obtener los documentos del usuario";
+                ViewData["ErrorMessage"] = "Hubo un error al obtener los documentos del usuario, intente de nuevo o comuníquese con un administrador.";
                 return PartialView("~/Views/Shared/ErrorAlert.cshtml", new ErrorViewModel());
             }
         }
