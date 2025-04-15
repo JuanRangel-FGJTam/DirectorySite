@@ -1,0 +1,43 @@
+@model PersonResponse
+
+@functions
+{
+    string GetButtonValue()
+    {
+        return Model.BannedAt == null ? "Bloquear persona" : "Desbloquear persona";
+    }
+}
+
+<div class="container">
+    <form id="banPersonForm" class="row my-2" method="patch">
+        @if(Model.BannedAt == null)
+        {
+            <div class="col-12">
+                <div class="alert alert-primary" role="alert">
+                    <p>La persona no esta bloqueada</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
+                    <p>La persona actualmente se encuentra bloqueada</p>
+                </div>
+            </div>
+
+        }
+
+        <div class="col-12">
+            <div class="form-group">
+                <label for="exampleFormControlTextarea1">Comentarios / Motivo</del></label>
+                <textarea id="banPersonReason" class="form-control" rows="3" required></textarea>
+            </div>
+        </div>
+
+        <div class="col-4 mt-2">
+            <button type="submit" class="text-uppercase btn btn-danger">@GetButtonValue()</button>
+        </div>
+
+    </form>
+</div>

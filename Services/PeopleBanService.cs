@@ -84,15 +84,88 @@ public class PeopleBanService : IPeopleBanService
         throw new NotImplementedException();
     }
 
-    public Task BanPerson(Guid personId)
+    public async Task BanPerson(Guid personId, string reason)
     {
-        throw new NotImplementedException();
+        LoadAuthToken();
+        
+        using var client = this.httpClientFactory.CreateClient("DirectoryAPI");
+        
+        // * prepare the request
+        var payload = JsonConvert.SerializeObject(new { Message = reason }, jsonSerializerSettings);
+        var httpRequest = new HttpRequestMessage
+        {
+            Method = HttpMethod.Post,
+            RequestUri = new Uri(client.BaseAddress!, $"/api/people-banned/{personId}"),
+            Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
+        };
+        httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+
+        // * send the request
+        var httpResponse = await client.SendAsync(httpRequest);
+        try
+        {
+            httpResponse.EnsureSuccessStatusCode();
+        }
+        catch(HttpRequestException httpEx)
+        {
+            throw httpEx.StatusCode switch
+            {
+                System.Net.HttpStatusCode.BadRequest => new ArgumentException(httpEx.Message, httpEx),
+                System.Net.HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
+                _ => new InvalidDataException(),
+            };
+        }
+
+        // * process the response
+        var response = await httpResponse.Content.ReadFromJsonAsync<PagedResponse<PersonResponse>>();
+        if(response == null)
+        {
+            var responseString = await httpResponse.Content.ReadAsStringAsync();
+            this.logger.LogError("Fail at process the response [{response}]", responseString);
+            throw new InvalidDataException("Can't process the reponse");
+        }
     }
 
-    public async Task UnbanPerson(Guid personId)
+    public async Task UnbanPerson(Guid personId, string reason)
     {
-        await Task.CompletedTask;
-        throw new NotImplementedException();
+        LoadAuthToken();
+        
+        using var client = this.httpClientFactory.CreateClient("DirectoryAPI");
+        
+        // * prepare the request
+        var payload = JsonConvert.SerializeObject(new { Message = reason }, jsonSerializerSettings);
+        var httpRequest = new HttpRequestMessage
+        {
+            Method = HttpMethod.Post,
+            RequestUri = new Uri(client.BaseAddress!, $"/api/people-banned/{personId}/unban"),
+            Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
+        };
+        httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+
+        // * send the request
+        var httpResponse = await client.SendAsync(httpRequest);
+        try
+        {
+            httpResponse.EnsureSuccessStatusCode();
+        }
+        catch(HttpRequestException httpEx)
+        {
+            throw httpEx.StatusCode switch
+            {
+                System.Net.HttpStatusCode.BadRequest => new ArgumentException(httpEx.Message, httpEx),
+                System.Net.HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
+                _ => new InvalidDataException(),
+            };
+        }
+
+        // * process the response
+        var response = await httpResponse.Content.ReadFromJsonAsync<PagedResponse<PersonResponse>>();
+        if(response == null)
+        {
+            var responseString = await httpResponse.Content.ReadAsStringAsync();
+            this.logger.LogError("Fail at process the response [{response}]", responseString);
+            throw new InvalidDataException("Can't process the reponse");
+        }
     }
 
 

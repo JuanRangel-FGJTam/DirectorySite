@@ -8,16 +8,18 @@ using DirectorySite.Data;
 using DirectorySite.Models;
 using DirectorySite.Services;
 using DirectorySite.Interfaces;
+using System.Net.Mime;
 
 
 namespace DirectorySite.Controllers
 {
     [Auth]
     [Route("[controller]")]
-    public class PeopleBanController(ILogger<PeopleBanController> logger, IPeopleBanService peopleBanService) : Controller
+    public class PeopleBanController(ILogger<PeopleBanController> logger, IPeopleBanService peopleBanService, PeopleService peopleService) : Controller
     {
         private readonly ILogger<PeopleBanController> logger = logger;
         private readonly IPeopleBanService peopleBanService = peopleBanService;
+        private readonly PeopleService peopleService = peopleService;
         private readonly int pageSize = 25;
         
         [HttpGet("")]
@@ -27,6 +29,41 @@ namespace DirectorySite.Controllers
             ViewBag.CurrentPage = page;
             return View();
         }
+
+        [HttpPatch]
+        [Route("{personId}")]
+        [Consumes(MediaTypeNames.Application.FormUrlEncoded)]
+        [Produces(MediaTypeNames.Application.Json)]
+        public async Task<IActionResult> UpdatePerson([FromRoute] Guid personId, [FromForm] UpdatePersonBanRequest request)
+        {
+            // * attempt to get the person
+            PersonResponse? personResponse = null;
+            try
+            {
+                personResponse = await this.peopleService.GetPersonById(personId.ToString())
+                    ?? throw new KeyNotFoundException("The person was not found on the system.");
+            }
+            catch(Exception err)
+            {
+                this.logger.LogError(err, "Fail at get the data of the person '{personId}'", personId);
+                return Conflict( new {
+                    Message = "Error al obtene los datos del usuario."
+                });
+            }
+            
+            // * update the contact information of the person
+            if(personResponse!.BannedAt == null)
+            {
+                await this.peopleBanService.BanPerson(personId, request.Message);
+            }
+            else
+            {
+                await this.peopleBanService.UnbanPerson(personId, request.Message);
+            }
+
+            return Ok();
+        }
+
 
         #region Partial Views
         [Route("table-records")]
