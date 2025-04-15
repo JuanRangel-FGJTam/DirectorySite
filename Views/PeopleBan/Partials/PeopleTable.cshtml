@@ -38,7 +38,7 @@
                 <td> @person.Curp </td>
                 <td> @person.Email</td>
                 <td> @person.GenderName</td>
-                <td> @person.Birthdate</td>
+                <td> @person.Birthdate?.ToString("dd/MM/yyy")</td>
                 <td>
                     <a class="btn btn-link" asp-action="Person" asp-controller="People" asp-route-personID="@person.PersonId">Mostrar</a>
                 </td>
