@@ -43,6 +43,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="RecoveryAccount" asp-action="Index">Recuperacion de Cuentas</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="PeopleBan" asp-action="Index">Personas bloqueadas</a>
+                        </li>
 
                         @if(User.IsInRole("Admin"))
                         {
@@ -86,7 +89,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
+    @* <script src="https://cdn.jsdelivr.net/npm/@@11.14.5/dist/sweetalert2.all.min.js"></script> *@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
