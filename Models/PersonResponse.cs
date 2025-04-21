@@ -59,18 +59,20 @@ namespace DirectorySite.Models
         [JsonPropertyName("appName")]
         public string? AppName { get; set; }
 
+        [JsonPropertyName("bannedAt")]
+        public DateTime? BannedAt { get; set; }
+
         [JsonPropertyName("fullName")]
         public string? FullName { get; set; }
 
         [JsonPropertyName("birthdateFormated")]
         public string? BirthdateFormated { get; set; }
 
-
         [JsonPropertyName("address")]
-        public AddressResponse? Address {get;set;}
+        public AddressResponse? Address { get; set; }
 
         [JsonPropertyName("contactInformation")]
-        public IEnumerable<ContactInformationResponse>? ContactInformation {get;set;}
-    
+        public IEnumerable<ContactInformationResponse>? ContactInformation { get; set; }
+
     }
 }

@@ -20,6 +20,10 @@
             <div class="container d-flex flex-column align-items-start">
               <span class="text-black-50 text-wrap">@Model.FullName</span>
               <span class="text-black-50 text-wrap">@Model.PersonId</span>
+              @if(Model.BannedAt != null)
+              {
+                <span class="badge badge-danger bg-danger px-4 my-1 text-uppercase" style="font-size: .75rem; border-radius: .5rem;">Bloqueado</span>
+              }
             </div>
         </div>
       </div>
@@ -43,6 +47,11 @@
             Direccion
           </button>
         </li>
+        <li class="nav-item">
+          <button class="nav-link" id="ban-tab" data-bs-toggle="tab" data-bs-target="#ban" type="button" role="tab" aria-controls="ban" aria-selected="false">
+            Bloqueo
+          </button>
+        </li>
       </ul>
     </div>
 
@@ -55,6 +64,9 @@
       </div>
       <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
         <partial name="./Partials/PersonEditAddress.cshtml" />
+      </div>
+      <div class="tab-pane fade" id="ban" role="tabpanel" aria-labelledby="ban-tab">
+        <partial name="./Partials/PersonUnbanPanel.cshtml" model="@Model!" />
       </div>
     </div>
 
@@ -71,5 +83,5 @@
   <script>
     let currentPersonID = '@Html.Raw(Model.PersonId)';
   </script>
-  <script src="~/js/person/personEdit.js"></script>
+  <script src="~/js/person/personEdit.min.js"></script>
 }

@@ -2,6 +2,7 @@ using DirectorySite.Data;
 using DirectorySite.Services;
 using DirectorySite.Helper;
 using DirectorySite.Core;
+using DirectorySite.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.AddScoped<PeopleProcedureService>();
 builder.Services.AddScoped<RecoveryAccountService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IPeopleDocumentService, PeopleDocumentService>();
+builder.Services.AddScoped<IPeopleBanService, PeopleBanService>();
 builder.Services.AddPreregisterServices();
 
 var app = builder.Build();
