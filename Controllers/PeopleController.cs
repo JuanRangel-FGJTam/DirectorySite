@@ -18,7 +18,7 @@ namespace DirectorySite.Controllers
 
     [Auth]
     [Route("[controller]")]
-    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService, PeopleProcedureService _peopleProcedureService, CatalogService _catalogService, IPeopleDocumentService peopleDocumentService) : Controller
+    public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService, PeopleProcedureService _peopleProcedureService, CatalogService _catalogService, IPeopleDocumentService peopleDocumentService, RecoveryAccountService recoveryAccountService) : Controller
     {
         private readonly ILogger<PeopleController> _logger = logger;
         private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
@@ -29,6 +29,7 @@ namespace DirectorySite.Controllers
         private readonly PeopleProcedureService peopleProcedureService = _peopleProcedureService;
         private readonly CatalogService catalogService = _catalogService;
         private readonly IPeopleDocumentService peopleDocumentService = peopleDocumentService;
+        private readonly RecoveryAccountService recoveryAccountService = recoveryAccountService;
 
         public async Task<IActionResult> Index([FromQuery] string? search)
         {
@@ -281,6 +282,26 @@ namespace DirectorySite.Controllers
                 this._logger.LogError(err, "Fail at get the documents of the person '{personId}'", personID);
                 ViewData["ErrorTitle"] = "Error al obtener los documentos del usuario";
                 ViewData["ErrorMessage"] = "Hubo un error al obtener los documentos del usuario, intente de nuevo o comuníquese con un administrador.";
+                return PartialView("~/Views/Shared/ErrorAlert.cshtml", new ErrorViewModel());
+            }
+        }
+
+        [HttpGet]
+        [Route("{personId}/recovery-requests")]
+        public async Task<IActionResult> GetRecoveryRequestsPartialView([FromRoute] string personId)
+        {
+            IEnumerable<RecoveryAccountResponse> accountRecoveyList = [];
+            try
+            {
+                var _personId = Guid.Parse(personId);
+                accountRecoveyList = await this.recoveryAccountService.GetRequestFromAPerson(_personId, take:5, offset:0);
+                return PartialView("~/Views/People/Partials/PersonAccountRecovery.cshtml", accountRecoveyList);
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the recovery account request data of the person '{personId}'", personId);
+                ViewData["ErrorTitle"] = "Error al obtener las peticiones de recuperacion de cuenta del usuario";
+                ViewData["ErrorMessage"] = "Hubo un error al obtener las peticiones de recuperacion de cuenta del usuario, intente de nuevo o comuníquese con un administrador.";
                 return PartialView("~/Views/Shared/ErrorAlert.cshtml", new ErrorViewModel());
             }
         }
