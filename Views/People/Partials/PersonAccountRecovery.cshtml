@@ -1,0 +1,103 @@
+﻿@model IEnumerable<RecoveryAccountResponse>
+
+<div class="row align-items-start">
+    <div class="col-12">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Estatus</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Correo</th>
+                    <th scope="col">Telefono</th>
+                    <th scope="col">Peticion</th>
+                    <th scope="col">Respuesta</th>
+                    <th scope="col">Atendida</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: .9rem;">
+                @{
+                    var i = 1;
+                }
+                @foreach(var item in Model)
+                {
+                    <tr>
+                        <td scope="row">@i</td>
+                        <td>
+                            <span class="badge bg-primary text-bg-primary">@item.Status</span>
+                        </td>
+                        <td>@item.CreatedAt.ToString("dd MMM yyyy HH:mm")</td>
+                        <td>
+                            <div class="d-flex flex-column align-items-center">
+                                @if(string.IsNullOrEmpty(item.ContactEmail) && string.IsNullOrEmpty(item.ContactEmail2))
+                                {
+                                    <div class="text-sm">
+                                        * Sin correo
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-sm text-lowercase">
+                                        @item.ContactEmail
+                                    </div>
+                                    <div class="text-sm text-lowercase">
+                                        @item.ContactEmail2
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column align-items-center text-center">
+                                @if(string.IsNullOrEmpty(item.ContactPhone) && string.IsNullOrEmpty(item.ContactPhone))
+                                {
+                                    <div class="text-sm">
+                                        * Sin telefono
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-sm text-lowercase">
+                                        @item.ContactPhone
+                                    </div>
+                                    <div class="text-sm text-lowercase">
+                                        @item.ContactPhone2
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <p>@item.RequestComments</p>
+                        </td>
+                        <td>
+                            <p>@item.ResponseComments</p>
+                        </td>
+                        <td>
+                            @if(item.AttendingDate != null)
+                            {
+                                <div class="text-sm">
+                                    @item.AttendingDate.Value.ToString("dd MMM yyyy HH:mm")
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <a asp-controller="RecoveryAccount" asp-action="show" asp-route-recordID="@item.Id" class="btn btn-sm btn-primary me-2">Mostrar</a>
+                            </div>
+                        </td>
+                    </tr>
+                    i++;
+                }
+
+                @if(!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" scope="row">
+                            No hay registros
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

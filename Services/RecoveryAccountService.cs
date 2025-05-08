@@ -230,6 +230,50 @@ namespace DirectorySite.Services
             return responseList;
         }
 
+        public async Task<IEnumerable<RecoveryAccountResponse>> GetRequestFromAPerson(Guid personId, int take = 5,int offset = 0)
+        {
+            // * load the authToken if is not loaded
+            if(string.IsNullOrEmpty(authToken)){
+                RetriveAuthToken();
+            }
+
+            // * prepare the parameters
+            IEnumerable<string> queryParams = [
+                string.Format("take={0}", take),
+                string.Format("offset={0}", offset)
+            ];
+
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/accountRecovery/people/{personId}?" + string.Join("&", queryParams)),
+                Method = HttpMethod.Get
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+            
+            // * send the request
+            PagedResponse<RecoveryAccountResponse>? response;
+            try
+            {
+                var httpResponse = await httpClient.SendAsync(httpRequest);
+                httpResponse.EnsureSuccessStatusCode();
+                response = await httpResponse.Content.ReadFromJsonAsync<PagedResponse<RecoveryAccountResponse>>();
+                return response?.Items ?? [];
+            }
+            catch(HttpRequestException httpex)
+            {
+                this.logger.LogError(httpex, "Fail at get the preregister records: {message}", httpex.Message);
+                throw httpex.StatusCode switch
+                {
+                    HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
+                    HttpStatusCode.BadRequest => new ArgumentException(),
+                    _ => new Exception(),
+                };
+            }
+        }
+
         #region private methods
 
         /// <summary>

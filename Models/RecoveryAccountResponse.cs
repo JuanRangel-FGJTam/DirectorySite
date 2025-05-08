@@ -154,5 +154,35 @@ namespace DirectorySite.Models;
                 return BirthDate.ToString("dd MMMM yyyy", new CultureInfo("es-MX"));
             }
         }
+
+        public string Status {
+            get {
+                if (DeletedAt != null) {
+                    return "Eliminada";
+                }
+                if (FinishedAt != null) {
+                    return "Finalizada";
+                }
+                if (AttendingAt != null) {
+                    return "Atendida";
+                }
+                return "Pendiente";
+            }
+        }
+
+         public DateTime? AttendingDate {
+            get {
+                if (DeletedAt != null) {
+                    return DeletedAt;
+                }
+                if (FinishedAt != null) {
+                    return FinishedAt;
+                }
+                if (AttendingAt != null) {
+                    return AttendingAt;
+                }
+                return null;
+            }
+        }
     }
 
