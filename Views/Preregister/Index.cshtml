@@ -16,8 +16,10 @@
 
 <div class="fluid-container ">
     <div class="row align-items-start">
+        <input id="searchInput" type="search" class="form-control form-control-lg mb-3" placeholder="Buscar por correo, token" value="@ViewBag.CurrentFilterSearch"/>
+    </div>
+    <div class="row align-items-start">
         <div id="tableWrapper" class="col-12">
-            @* <partial name="partials/RecordsTable.cshtml" model="@Model"/> *@
             <div class="d-flex align-items-center alert alert-primary mt-3" role="alert">
                 <div class="spinner-border" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -32,6 +34,7 @@
     <script>
         document.currentPage = '@Html.Raw(ViewBag.CurrentPage)';
         document.filterStatus = '@Html.Raw(ViewBag.CurrentFilterStatus)';
+        document.filterSearch = '@Html.Raw(ViewBag.CurrentFilterSearch)';
     </script>
     <script src="~/js/preregisters/index.js"></script>
 }

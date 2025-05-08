@@ -28,6 +28,12 @@ function loadDataTable()
 {
     var args = [];
     args.push(`p=${document.currentPage}`);
+    
+    if (typeof document.filterSearch === 'string' && document.filterSearch.trim() !== "")
+    {
+        args.push(`search=${document.filterSearch}`);
+    }
+
     if(document.filterStatus > 0)
     {
         args.push(`filter=${document.filterStatus}`);
@@ -44,8 +50,12 @@ function goToPage(page)
     loadDataTable();
 }
 
-jQuery(document).ready(()=>
-    {
-        $("#updateRecordsButton").click(refreshData);
+jQuery(document).ready(()=> {
+    $("#searchInput").on('change', (e) => {
+        document.filterSearch = $("#searchInput").val();
         loadDataTable();
     });
+
+    $("#updateRecordsButton").click(refreshData);
+    loadDataTable();
+});

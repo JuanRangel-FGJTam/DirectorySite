@@ -16,13 +16,14 @@ namespace DirectorySite.Controllers
         private readonly PreregisterService preregisterService = preregisterService;
         
 
-        public async Task<IActionResult> Index([FromQuery] int p = 1, [FromQuery] int filter = 0)
+        public async Task<IActionResult> Index([FromQuery] int p = 1, [FromQuery] int filter = 0, [FromQuery] string search = "")
         {
             try
             {
                 ViewBag.CurrentPage = p;
                 ViewBag.CurrentFilterStatus = filter;
-                var responseData = await preregisterService.GetPreregisters();
+                ViewBag.CurrentFilterSearch = search;
+                var responseData = await preregisterService.GetPreregisters(search:search);
                 ViewBag.LastUpdate = DateTime.Now;
                 return View(responseData.Data);
             }
@@ -66,14 +67,14 @@ namespace DirectorySite.Controllers
 
         #region Partial views
         [Route("table-records")]
-        public async Task<IActionResult> GetTableRecords([FromQuery] int p = 1, [FromQuery] int filter = 0){
+        public async Task<IActionResult> GetTableRecords([FromQuery] int p = 1, [FromQuery] int filter = 0, [FromQuery] string search = ""){
             try
             {
                 int take = 25;
                 int skip = (p-1) * take;
 
                 // * get the data
-                var preregisterPaginator = await this.preregisterService.GetPreregisters(take, skip);
+                var preregisterPaginator = await this.preregisterService.GetPreregisters(take, skip, search);
 
                 ViewBag.LastUpdate = DateTime.Now;
                 ViewBag.TotalRecords = preregisterPaginator.Total;
