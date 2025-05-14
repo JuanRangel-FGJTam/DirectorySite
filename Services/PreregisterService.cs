@@ -19,7 +19,7 @@ namespace DirectorySite.Services
         private string authToken = string.Empty;
 
 
-        public async Task<PreregisterPaginatorResponse> GetPreregisters(int take = 25, int skip = 0)
+        public async Task<PreregisterPaginatorResponse> GetPreregisters(int take = 25, int skip = 0, string search = "")
         {
 
             // * load the authToken if is not loaded
@@ -28,10 +28,21 @@ namespace DirectorySite.Services
             }
 
             // * prepare the request
+            var parameters = new List<string>()
+            {
+                {$"take={take}"},
+                {$"offset={skip}"}
+            };
+
+            if(!string.IsNullOrEmpty(search))
+            {
+                parameters.Add($"search={search}");
+            }
+
             using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/pre-registration?take={take}&offset={skip}"),
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/pre-registration?" + string.Join("&", parameters)),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
