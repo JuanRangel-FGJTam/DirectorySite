@@ -15,7 +15,6 @@ using DirectorySite.Core;
 
 namespace DirectorySite.Controllers
 {
-
     [Auth]
     [Route("[controller]")]
     public class PeopleController(ILogger<PeopleController> logger, IHttpClientFactory httpClientFactory, IConfiguration configuration, PeopleSearchService _peopleSearchService, PeopleService _peopleService, PeopleSessionService _peopleSessionService, PeopleProcedureService _peopleProcedureService, CatalogService _catalogService, IPeopleDocumentService peopleDocumentService, RecoveryAccountService recoveryAccountService) : Controller
@@ -31,11 +30,13 @@ namespace DirectorySite.Controllers
         private readonly IPeopleDocumentService peopleDocumentService = peopleDocumentService;
         private readonly RecoveryAccountService recoveryAccountService = recoveryAccountService;
 
+        const int PhonenumberContactType = 1;
+
         public async Task<IActionResult> Index([FromQuery] string? search)
         {
             var viewModel = new PeopleIndexViewModel
             {
-                Search = search    
+                Search = search
             };
             
             if(string.IsNullOrEmpty(search))
@@ -104,7 +105,7 @@ namespace DirectorySite.Controllers
                 });
             }
             
-            // *  verify if the person is found 
+            // *  verify if the person is found
             if(personResponse == null)
             {
                 ViewBag.NotFoundMessage = "La persona no se encuntra registrada en el sistema";
@@ -113,6 +114,7 @@ namespace DirectorySite.Controllers
 
             // * prepare request models
             ViewBag.UpdatePersonGeneralsRequest = await InitializedUpdatePersonGeneralsRequest(personResponse);
+            ViewBag.UpdatePersonEmailRequest = await InitializedUpdatePersonEmailRequest(personResponse);
             ViewBag.UpdatePersonContactRequest = await InitializedUpdatePersonContactRequest(personResponse);
 
             // * return the view
@@ -127,7 +129,6 @@ namespace DirectorySite.Controllers
         [Produces(MediaTypeNames.Application.Json)]
         public async Task<IActionResult> UpdateGeneralData([FromRoute] string personID, [FromForm] UpdatePersonGeneralsRequest request)
         {
-
             // TODO: Validate the request
 
             // * attempt to get the person
@@ -177,6 +178,53 @@ namespace DirectorySite.Controllers
         }
 
         [HttpPatch]
+        [Route("{personID}/email")]
+        [Consumes(MediaTypeNames.Application.FormUrlEncoded)]
+        [Produces(MediaTypeNames.Application.Json)]
+        public async Task<IActionResult> UpdateEmail([FromRoute] string personID, [FromForm] UpdatePersonEmailRequest request)
+        {
+            // * attempt to get the person
+            PersonResponse? personResponse = null;
+            try
+            {
+                personResponse = await this.peopleService.GetPersonById(personID);
+            }
+            catch(UnauthorizedAccessException)
+            {
+                this._logger.LogInformation("Redirect");
+                return Unauthorized();
+            }
+            catch(Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
+                return Conflict( new {
+                    Message = "Error al obtene los datos del usuario."
+                });
+            }
+
+            // * update the contact information of the person
+            try
+            {
+                var response = await peopleService.UpdatePersonEmail(personID, request.Email!);
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (ArgumentException ae)
+            {
+                return BadRequest(new {
+                    ae.Message
+                });
+            }
+            catch (InvalidDataException)
+            {
+                return Conflict();
+            }
+        }
+        
+        [HttpPatch]
         [Route("{personID}/contact")]
         [Consumes(MediaTypeNames.Application.FormUrlEncoded)]
         [Produces(MediaTypeNames.Application.Json)]
@@ -204,7 +252,13 @@ namespace DirectorySite.Controllers
             // * update the contact information of the person
             try
             {
-                var response = await peopleService.UpdatePersonEmail(personID, request.Email!); 
+                // * check the contact type
+                if(request.ContactTypeId <= 0)
+                {
+                    request.ContactTypeId = PhonenumberContactType;
+                }
+
+                var response = await peopleService.UpdateContactInformation(personResponse!.PersonId!, request);
                 return Ok();
             }
             catch (UnauthorizedAccessException)
@@ -308,8 +362,8 @@ namespace DirectorySite.Controllers
         #endregion
 
         #region private functions
-        private async Task<UpdatePersonGeneralsRequest> InitializedUpdatePersonGeneralsRequest(PersonResponse personResponse){
-
+        private async Task<UpdatePersonGeneralsRequest> InitializedUpdatePersonGeneralsRequest(PersonResponse personResponse)
+        {
             // * get the catalogs
             IEnumerable<Gender>? genders = [];
             IEnumerable<MaritalStatus>? maritalStatuses = [];
@@ -357,14 +411,28 @@ namespace DirectorySite.Controllers
             return updatePersonGeneralsRequest;
         }
 
-        private async Task<UpdatePersonContactRequest> InitializedUpdatePersonContactRequest(PersonResponse personResponse){
+        private async Task<UpdatePersonEmailRequest> InitializedUpdatePersonEmailRequest(PersonResponse personResponse)
+        {
+            await Task.CompletedTask;
+            // * prepare request models
+            var updatePersonGeneralsRequest = new UpdatePersonEmailRequest {
+                Email = personResponse.Email
+            };
+            return updatePersonGeneralsRequest;
+        }
 
+        private async Task<UpdatePersonContactRequest> InitializedUpdatePersonContactRequest(PersonResponse personResponse)
+        {
             // * get the catalogs
             IEnumerable<ContactType>? contactTypes = await catalogService.GetContactTypes() ?? [];
 
+            // * retrive the phoneNumber
+            var contactInfo = personResponse.ContactInformation?.FirstOrDefault(item => item.ContactTypeId == PhonenumberContactType);
+
             // * prepare request models
             var updatePersonGeneralsRequest = new UpdatePersonContactRequest {
-                Email = personResponse.Email,
+                ContactTypeId = PhonenumberContactType,
+                Value = contactInfo == null ? "": contactInfo.Value,
                 ContactTypes = contactTypes.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
             };
 

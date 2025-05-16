@@ -137,17 +137,34 @@ namespace DirectorySite.Services
         {
             LoadAuthToken();
 
-            // * prepare the payload
+            // * check if the user has already the contact info
+            var contacts = await this.GetContactInformations(personID);
+            var lastContact = contacts?.FirstOrDefault(item => item.ContactTypeId == request.ContactTypeId);
+
+            // * attempt to delete the las contact before insert the newone
+            if(lastContact != null)
+            {
+                if(lastContact.Value?.Trim() == request.Value?.Trim())
+                {
+                    throw new ArgumentException("El valor del contacto proporcionado es igual al existente.");
+                }
+
+                await this.DeleteContactInformation(lastContact.ContactId!);
+            }
+
+            // * store the new contactInfo
             var payload = JsonConvert.SerializeObject( new {
-                Email = request.Email
+                PersonID = personID,
+                ContactTypeID = request.ContactTypeId,
+                Value = request.Value
             }, jsonSerializerSettings);
 
             // * prepare the request
             using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
-                Method = HttpMethod.Patch,
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/people/{personID}"),
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(httpClient.BaseAddress!, "/api/contact"),
                 Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json")
             };
             httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
@@ -241,6 +258,79 @@ namespace DirectorySite.Services
                 };
             }
 
+            return 1;
+        }
+
+        public async Task<IEnumerable<ContactInformationResponse>?> GetContactInformations(string personID)
+        {
+            LoadAuthToken();
+
+            var personData = await this.GetPersonById(personID);
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/people/{personID}/contactInformations")
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+
+            // * send the request and validate the response
+            var response = await httpClient.SendAsync(httpRequest);
+            try
+            {
+                response.EnsureSuccessStatusCode();
+                var responseList = await response.Content.ReadFromJsonAsync<IEnumerable<ContactInformationResponse>>();
+                return responseList;
+            }
+            catch(HttpRequestException httpEx)
+            {
+                // * attempt to parse the response body
+                var errorMessage = httpEx.Message;
+                if(httpEx.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
+                {
+                    try
+                    {
+                        UpdatePersonGeneralsErrorResponse? errors = await response.Content.ReadFromJsonAsync<UpdatePersonGeneralsErrorResponse>();
+                        if(errors != null)
+                        {
+                            errorMessage = string.Join(", ", errors.Errors.SelectMany( kvp => kvp.Value));
+                            this.logger.LogInformation("Text:" + errorMessage);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        this.logger.LogError(ex.Message);
+                    }
+                }
+                
+                throw httpEx.StatusCode switch
+                {
+                    System.Net.HttpStatusCode.UnprocessableEntity => new ArgumentException(errorMessage, httpEx),
+                    System.Net.HttpStatusCode.BadRequest => new ArgumentException(errorMessage, httpEx),
+                    System.Net.HttpStatusCode.Unauthorized => new UnauthorizedAccessException(),
+                    _ => new InvalidDataException(),
+                };
+            }
+        }
+
+        public async Task<int> DeleteContactInformation(string contactInfoId)
+        {
+            LoadAuthToken();
+
+            // * prepare the request
+            using var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/contact/{contactInfoId}")
+            };
+            httpRequest.Headers.Add("Authorization", $"Bearer {authToken}");
+
+            // * send the request and validate the response
+            var response = await httpClient.SendAsync(httpRequest);
+            response.EnsureSuccessStatusCode();
             return 1;
         }
 

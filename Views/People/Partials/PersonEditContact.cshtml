@@ -4,12 +4,12 @@
     <div class="row">
         <form id="contactForm" class="row my-2" asp-action="UpdateContactInformation" asp-route-personId="@Model.PersonId" method="patch">
             <div class="mb-2 col-md-12">
-                @Html.LabelFor(item => item.Email, new { @class="label"})
-                @Html.TextBoxFor(item => item.Email, new { @class="form-control", @type="email", @required="true"})
+                @Html.LabelFor(item => item.Value, new { @class="label"})
+                @Html.TextBoxFor(item => item.Value, new { @class="form-control", @type="tel", @required="true"})
             </div>
 
             <div class="mt-2">
-                <button type="submit" class="btn btn-success">Actualizar Llave Digital</button>
+                <button type="submit" class="btn btn-success">Actualizar Contacto</button>
             </div>
         </form>
     
