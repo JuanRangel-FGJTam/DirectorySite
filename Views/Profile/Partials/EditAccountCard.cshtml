@@ -1,0 +1,23 @@
+@model DirectorySite.Models.UserResponse
+
+<div class="card">
+    <div class="card-body">
+        <div class="row justify-content-center">
+            <div class="font-bold pb-2">
+                <h4>Datos Generales</h4>
+            </div>
+            <div class="form-group mb-2">
+                <label for="name1">Nombre(s)</label>
+                <input type="text" class="form-control" disabled="" value="@Model.FirstName">
+            </div>
+            <div class="form-group mb-2">
+                <label for="name1">Apellidos</label>
+                <input type="text" class="form-control"disabled value="@Model.LastName" />
+            </div>
+            <div class="form-group mb-1">
+                <label for="email45">Correo</label>
+                <input type="email" class="form-control" disabled value="@Model.Email" >
+            </div>
+        </div>
+    </div>
+</div>

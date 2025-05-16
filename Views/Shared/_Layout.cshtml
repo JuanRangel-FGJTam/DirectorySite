@@ -66,6 +66,9 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li>
+                            @Html.ActionLink("Perfil", "Index", "Profile", null, new {Class="dropdown-item"})
+                        </li>
+                        <li>
                             @using(Html.BeginForm("Logout", "Authentication", FormMethod.Post)){
                                 <button class="dropdown-item">Cerrar sesion</button>
                             }
