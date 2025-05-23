@@ -11,13 +11,12 @@ namespace DirectorySite.Models
     public class UpdatePersonContactRequest
     {
         public string? PersonId { get; set; }
-        
-        [Display(Name = "Correo")]
-        public string? Email { get; set; }
 
+        public int ContactTypeId {get;set;}
+        
+        public string? Value { get; set; }
 
         [JsonIgnore]
         public IEnumerable<SelectListItem> ContactTypes { get; set; } = [];
-
     }
 }

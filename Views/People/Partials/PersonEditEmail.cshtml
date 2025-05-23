@@ -1,0 +1,19 @@
+@model UpdatePersonEmailRequest
+
+<div class="container">
+    <div class="row">
+        <form id="emailForm" class="row my-2" asp-action="UpdateEmail" asp-route-personId="@Model.PersonId" method="patch">
+            <div class="mb-2 col-md-12">
+                @Html.LabelFor(item => item.Email, new { @class="label"})
+                @Html.TextBoxFor(item => item.Email, new { @class="form-control", @type="email", @required="true"})
+            </div>
+
+            <div class="mt-2">
+                <button type="submit" class="btn btn-success">Actualizar Llave Digital</button>
+            </div>
+        </form>
+    
+        <div class="col-12 my-1"></div>
+
+    </div>
+</div>
