@@ -61,7 +61,7 @@
                                 @if(person.Birthdate == null){
                                     <span></span>
                                 }else{
-                                    <span class="text-uppercase">@person.Birthdate.Value.ToString("dd MMM yyyy", new CultureInfo("es-MX"))</span>
+                                    <span class="text-uppercase">@person.Birthdate.Value.ToString("dd-MM-yyyy", new CultureInfo("es-MX"))</span>
                                 }
                             </td>
                             <td>

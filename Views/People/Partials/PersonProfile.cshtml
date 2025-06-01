@@ -93,7 +93,10 @@
 
                     <div class="col-md-6">
                         <label class="label">Fecha de nacimiento</label>
-                        <input type="text" class="form-control" disabled value="@Model.BirthdateFormated">
+                        @{
+                            var birthDate = Model.Birthdate != null ? Model.Birthdate.Value.ToString("dd/MM/yyyy") : "";
+                        }
+                        <input type="text" class="form-control" disabled value="@birthDate">
                     </div>
 
                     <div class="col-md-6">
