@@ -13,6 +13,18 @@
 
 <div class="container rounded bg-white">
 
+  <div class="row mb-2">
+    <div class="d-flex align-items-center">
+      @if(Model != null)
+      {
+      <a asp-controller="People" asp-action="Person" asp-route-personId="@Model.PersonId" class="mt-2 btn btn-sm btn-primary d-flex align-items-center">
+        <svg width="18" height="18" fill="currentColor" aria-hidden="true" data-prefix="fal" data-icon="angle-left" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" class="svg-inline--fa fa-angle-left"><path fill="currentColor" d="M25.1 247.5l117.8-116c4.7-4.7 12.3-4.7 17 0l7.1 7.1c4.7 4.7 4.7 12.3 0 17L64.7 256l102.2 100.4c4.7 4.7 4.7 12.3 0 17l-7.1 7.1c-4.7 4.7-12.3 4.7-17 0L25 264.5c-4.6-4.7-4.6-12.3.1-17z" class=""></path></svg>
+        <span>Regresar</span>
+      </a>
+      }
+    </div>
+  </div>
+
   <div class="row">
       <div class="col-12 border-right">
         <div class="d-flex align-items-center text-center p-1">
