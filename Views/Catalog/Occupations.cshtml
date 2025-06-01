@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DirectorySite.Models.Occupation>?
+﻿@model DirectorySite.Models.ViewModel.CatalogViewModel
 @{
     ViewData["Title"] = "Catalogo - Ocupaciones";
     ViewData["ActivePage"] = "Ocupaciones";
@@ -14,11 +14,23 @@
         </div>
 
         <div class="col-10">
-            @if(flagActions){
-            <div class="d-flex items-center border rounded p-2 mb-4">
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newElementModal">Agregar nuevo</button>
-            </div>
-            }
+            <form asp-action="Occupations" method="get" id="formFilters" class="d-flex align-items-center border rounded px-2 py-1 mb-2">
+                <div class="input-group input-group-sm" style="width: 16rem;">
+                    <span class="input-group-text">
+                        <svg width="12" height="12" aria-hidden="true" data-prefix="fal" data-icon="search" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-search fa-w-16 fa-7x"><path fill="currentColor" d="M508.5 481.6l-129-129c-2.3-2.3-5.3-3.5-8.5-3.5h-10.3C395 312 416 262.5 416 208 416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c54.5 0 104-21 141.1-55.2V371c0 3.2 1.3 6.2 3.5 8.5l129 129c4.7 4.7 12.3 4.7 17 0l9.9-9.9c4.7-4.7 4.7-12.3 0-17zM208 384c-97.3 0-176-78.7-176-176S110.7 32 208 32s176 78.7 176 176-78.7 176-176 176z" class=""></path>
+                        </svg>
+                    </span>
+                    <input id="tb_search" asp-for="SearchText" type="search" class="form-control" placeholder="Buscar..." />
+                </div>
+
+                @if(flagActions)
+                {
+                    <button type="button" class="ml-auto ms-auto btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#newElementModal">
+                        <svg width="12" height="12" aria-hidden="true" data-prefix="far" data-icon="plus" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="svg-inline--fa fa-plus fa-w-12 fa-7x"><path fill="currentColor" d="M368 224H224V80c0-8.84-7.16-16-16-16h-32c-8.84 0-16 7.16-16 16v144H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h144v144c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V288h144c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z" class=""></path></svg>
+                        Agregar Nuevo
+                    </button>
+                }
+            </form>
 
             <div class="border rounded">
                 <table class="table table-striped table-hover">
@@ -31,9 +43,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if( Model != null){
+                        @if( Model.Data.Any())
+                        {
                             var i = 1;
-                            foreach( var occupation in Model! ){
+                            foreach( var occupation in Model.Data ){
                                 <tr>
                                     <th scope="row">@i</th>
                                     <td>@occupation.Id</td>

@@ -10,6 +10,7 @@ public class CatalogStatesViewModel
     public int CountryId {get;set;} = 0;
     public int StateId {get;set;} = 0;
     public int MunicipalityId {get;set;} = 0;
+    public string? SearchText { get; set; }
     
     public IEnumerable<Country> Countries = [];
     public IEnumerable<State> States = [];
