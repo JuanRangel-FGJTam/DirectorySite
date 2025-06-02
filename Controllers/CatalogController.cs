@@ -32,44 +32,98 @@ namespace DirectorySite.Controllers
 
         [HttpGet]
         [Route("occupations")]
-        public async Task<IActionResult> Occupations()
+        public async Task<IActionResult> Occupations(string? searchText)
         {
-            var data = await catalogService.GetOccupations();
-            return View( data );
+            var data = await catalogService.GetOccupations() ?? [];
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                data = data!.Where(item => item.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            }
+
+            var viewModel = new CatalogViewModel
+            {
+                Data = data,
+                SearchText = searchText
+            };
+            
+            return View(viewModel);
         }
 
         [Route("nationalities")]
-        public async Task<IActionResult> Nationalities()
+        public async Task<IActionResult> Nationalities(string? searchText)
         {
-            var data = await catalogService.GetNationalities();
-            return View( data );
+            var data = await catalogService.GetNationalities() ?? [];
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                data = data.Where(item => item.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase)).ToArray();
+            }
+            
+            var viewModel = new CatalogViewModel
+            {
+                Data = data,
+                SearchText = searchText
+            };
+            return View(viewModel);
         }
 
         [Route("marital-status")]
-        public async Task<IActionResult> MaritalStatus()
+        public async Task<IActionResult> MaritalStatus(string? searchText)
         {
-            var data = await catalogService.GetMaritalStatuses();
-            return View( data );
+            var data = await catalogService.GetMaritalStatuses() ?? [];
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                data = data.Where(item => item.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            var viewModel = new CatalogViewModel
+            {
+                Data = data,
+                SearchText = searchText
+                
+            };
+            return View(viewModel);
         }
 
         [Route("contact-types")]
-        public async Task<IActionResult> ContactTypes()
+        public async Task<IActionResult> ContactTypes(string? searchText)
         {
-            var data = await catalogService.GetContactTypes();
-            return View( data );
+            var data = await catalogService.GetContactTypes() ?? [];
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                data = data.Where(item => item.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase));
+            }
+            var viewModel = new CatalogViewModel
+            {
+                Data = data,
+                SearchText = searchText
+                
+            };
+            return View(viewModel);
         }
         
 
         [Route("countries")]
-        public async Task<IActionResult> Countries()
+        public async Task<IActionResult> Countries(string? searchText)
         {
             ViewData["Title"] = "Catalogo - Paises";
-            var data = await catalogService.GetCountries();
-            return View(data);
+            var countries = await catalogService.GetCountries();
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                countries = countries!.Where(item => item.Name.Contains(searchText!, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            }
+
+            var viewModel = new CatalogStatesViewModel()
+            {
+                Countries = countries ?? [],
+                SearchText = searchText
+            };
+            
+            return View(viewModel);
         }
 
         [Route("States")]
-        public async Task<IActionResult> States(int? countryId )
+        public async Task<IActionResult> States(int? countryId, string? searchText )
         {
             if(countryId != null && countryId > 0)
             {
@@ -78,13 +132,19 @@ namespace DirectorySite.Controllers
 
             var countries = (await catalogService.GetCountries()) ?? [];
             var states = (await catalogService.GetStates(locaCountryID)) ?? [];
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                states = states.Where(item => item.Name.ToLower().Contains(searchText!.ToLower())).ToList();
+            }
+
             this._logger.LogDebug("Total states: {total}", states.Count());
             
-            var viewModel = new CatalogStatesViewModel 
+            var viewModel = new CatalogStatesViewModel
             {
                 CountryId = locaCountryID,
                 Countries = countries.ToList(),
-                States = states.ToList()
+                States = states.ToList(),
+                SearchText = searchText
             };
 
             ViewData["Title"] = "Catalogo - Estados";
@@ -131,7 +191,7 @@ namespace DirectorySite.Controllers
         }
 
         [Route("Municipalities")]
-        public async Task<IActionResult> Municipalities(int? countryId, int? stateId)
+        public async Task<IActionResult> Municipalities(int? countryId, int? stateId, string? searchText)
         {
             if(countryId != null && countryId > 0)
             {
@@ -146,15 +206,20 @@ namespace DirectorySite.Controllers
             var countries = (await catalogService.GetCountries()) ?? [];
             var states = (await catalogService.GetStates(locaCountryID)) ?? [];
             var municipalities = (await catalogService.GetMunicipalities(localStateID)) ?? [];
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                municipalities = municipalities.Where(item => item.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            }
             this._logger.LogDebug("Total Municipios: {total}", states.Count());
 
-            var viewModel = new CatalogStatesViewModel 
+            var viewModel = new CatalogStatesViewModel
             {
                 CountryId = locaCountryID,
                 StateId = localStateID,
                 Countries = countries.ToList(),
                 States = states.ToList(),
                 Municipalities = municipalities.ToList(),
+                SearchText = searchText
             };
 
             ViewData["Title"] = "Catalogo - Municipios";
@@ -206,7 +271,7 @@ namespace DirectorySite.Controllers
         }
 
         [Route("Colonies")]
-        public async Task<IActionResult> Colonies(int? countryId, int? stateId, int? municipalityId )
+        public async Task<IActionResult> Colonies(int? countryId, int? stateId, int? municipalityId, string? searchText)
         {
             if(countryId != null && countryId > 0)
             {
@@ -227,9 +292,13 @@ namespace DirectorySite.Controllers
             var states = (await catalogService.GetStates(locaCountryID)) ?? [];
             var municipalities = (await catalogService.GetMunicipalities(localStateID)) ?? [];
             var colonies = (await catalogService.GetColonies(localMunicipalityId)) ?? [];
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                colonies = colonies.Where(item => item.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            }
             this._logger.LogDebug("Total Municipios: {total}", states.Count());
 
-            var viewModel = new CatalogStatesViewModel 
+            var viewModel = new CatalogStatesViewModel
             {
                 CountryId = locaCountryID,
                 StateId = localStateID,
@@ -237,7 +306,8 @@ namespace DirectorySite.Controllers
                 Countries = countries.ToList(),
                 States = states.ToList(),
                 Municipalities = municipalities.ToList(),
-                Colonies = colonies.ToList()
+                Colonies = colonies.ToList(),
+                SearchText = searchText
             };
 
             ViewData["Title"] = "Catalogo - Colonias";
@@ -331,10 +401,19 @@ namespace DirectorySite.Controllers
     
         #region Document Types
         [Route("document-types")]
-        public async Task<IActionResult> DocumentTypes()
+        public async Task<IActionResult> DocumentTypes(string? searchText)
         {
-            var data = await catalogService.GetDocumentTypes();
-            return View(data);
+            var data = await catalogService.GetDocumentTypes() ?? [];
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                data = data.Where(item => item.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase));
+            }
+            var viewModel = new CatalogViewModel
+            {
+                Data = data,
+                SearchText = searchText
+            };
+            return View(viewModel);
         }
         
         [HttpDelete("document-types/{documentTypeId}")]
