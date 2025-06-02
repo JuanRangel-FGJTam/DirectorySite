@@ -34,19 +34,26 @@ namespace DirectorySite.Controllers
 
         public async Task<IActionResult> Index([FromQuery] string? search)
         {
+            // * save the search text
+            if (!string.IsNullOrEmpty(search))
+            {
+                HttpContext.Session.SetString("PeopleSearchText", search);
+            }
+
+            // * prepare the viewModel
             var viewModel = new PeopleIndexViewModel
             {
-                Search = search
+                Search = search ?? HttpContext.Session.GetString("PeopleSearchText")
             };
-            
-            if(string.IsNullOrEmpty(search))
+
+            if (string.IsNullOrEmpty(viewModel.Search))
             {
                 return View(viewModel);
             }
 
             try
             {
-                viewModel.People = await this.peopleSearchService.SearchPerson(search!) ?? [];
+                viewModel.People = await this.peopleSearchService.SearchPerson(viewModel.Search) ?? [];
                 return View(viewModel);
             }
             catch(Exception err)
