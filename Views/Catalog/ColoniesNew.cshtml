@@ -1,0 +1,103 @@
+﻿@model DirectorySite.Models.ViewModel.NewCatalogStatesViewModel
+
+<partial name="./Partials/PageHeader" />
+
+<div class="fluid-container ">
+    <div class="row align-items-start">
+        <div class="col-2">
+            <partial name="./Partials/CatalogSidebar" />
+        </div>
+
+        <div class="col-10 ">
+            
+            <div class="d-flex my-2">
+                <a asp-action="Colonies" class="btn btn-primary btn-sm">
+                    <svg aria-hidden="true" width="12" height="12" data-prefix="fal" data-icon="arrow-left" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="mt-0 svg-inline--fa fa-arrow-left"><path fill="currentColor" d="M231.536 475.535l7.071-7.07c4.686-4.686 4.686-12.284 0-16.971L60.113 273H436c6.627 0 12-5.373 12-12v-10c0-6.627-5.373-12-12-12H60.113L238.607 60.506c4.686-4.686 4.686-12.284 0-16.971l-7.071-7.07c-4.686-4.686-12.284-4.686-16.97 0L3.515 247.515c-4.686 4.686-4.686 12.284 0 16.971l211.051 211.05c4.686 4.686 12.284 4.686 16.97-.001z" class=""></path></svg>
+                    Regresar
+                </a>
+            </div>
+
+            @if(!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ViewBag.ErrorMessage
+                </div>
+            }
+
+            <div class="border rounded p-4 mx-auto">
+                <form method="post" asp-action="StoreColonies">
+                    <div class="form-group">
+                        <label asp-for="CountryId" class="control-label"></label>
+                        <select id="selectCountry" asp-for="CountryId" asp-items="@(Model.CountriesCatalog)" class="form-select form-select-sm">
+                            <option value="0">Seleccione un elemento</option>
+                        </select>
+                        <span asp-validation-for="CountryId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="StateId" class="control-label"></label>
+                        <select id="selectState" asp-for="StateId" asp-items="@(Model.StateCatalog)" class="form-select form-select-sm">
+                            <option value="0">Seleccione un elemento</option>
+                        </select>
+                        <span asp-validation-for="StateId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="MunicipalityId" class="control-label"></label>
+                        <select id="selectMunicipality" asp-for="MunicipalityId" asp-items="@(Model.MunicipalitiesCatalog)" class="form-select form-select-sm">
+                            <option value="0">Seleccione un elemento</option>
+                        </select>
+                        <span asp-validation-for="MunicipalityId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ColonyName" class="control-label"></label>
+                        <input asp-for="ColonyName" class="form-control" />
+                        <span asp-validation-for="ColonyName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ZipCode" class="control-label"></label>
+                        <input asp-for="ZipCode" class="form-control" />
+                        <span asp-validation-for="ZipCode" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <input type="submit" value="Crear nuevo" class="btn btn-success" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function()
+        {
+            $("#selectCountry").on("change", function(e)
+            {
+                var constryId = $(this).val();
+                if (constryId && constryId != "0") {
+                    window.location.href = "?countryId=" + encodeURIComponent(constryId);
+                }
+            });
+
+            $("#selectState").on("change", function(e)
+            {
+                var constryId = $("#selectCountry").val();
+                var stateId = $(this).val();
+                if (constryId && constryId != "0")
+                {
+                    var args = [
+                        `countryId=${encodeURIComponent(constryId)}`,
+                        `stateId=${encodeURIComponent(stateId)}`,
+                    ]
+                    window.location.href = "?" + args.join('&');
+                }
+            });
+
+        });
+    </script>
+}
