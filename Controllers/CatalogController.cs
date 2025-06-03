@@ -20,9 +20,9 @@ namespace DirectorySite.Controllers
         private readonly ILogger<CatalogController> _logger = logger;
         private readonly CatalogService catalogService = catalogService ;
         
-        private int locaCountryID = 137;
-        private int localStateID = 1;
-        private int localMunicipalityId = 1;
+        private int locaCountryID = 138;
+        private int localStateID = 28;
+        private int localMunicipalityId = 41;
         #endregion
 
         public IActionResult Index()
@@ -134,9 +134,8 @@ namespace DirectorySite.Controllers
             var states = (await catalogService.GetStates(locaCountryID)) ?? [];
             if (!string.IsNullOrEmpty(searchText))
             {
-                states = states.Where(item => item.Name.ToLower().Contains(searchText!.ToLower())).ToList();
+                states = await catalogService.GetStates(countryId:0, search: searchText) ?? [];
             }
-
             this._logger.LogDebug("Total states: {total}", states.Count());
             
             var viewModel = new CatalogStatesViewModel
@@ -193,25 +192,30 @@ namespace DirectorySite.Controllers
         [Route("Municipalities")]
         public async Task<IActionResult> Municipalities(int? countryId, int? stateId, string? searchText)
         {
-            if(countryId != null && countryId > 0)
+            locaCountryID = countryId ?? 138;
+            localStateID = stateId ?? 28;
+            
+            // * get the coutry and states catalogs
+            var countries = await catalogService.GetCountries() ?? [];
+            var states = await catalogService.GetStates(locaCountryID) ?? [];
+
+            // * the stateId is not in the country catalog, update them
+            if (!states.Select(item => item.Id).Contains(localStateID))
             {
-                locaCountryID = countryId.Value;
+                localStateID = states.FirstOrDefault()?.Id ?? -1;
             }
 
-            if(stateId != null && stateId > 0)
-            {
-                localStateID = stateId.Value;
-            }
-
-            var countries = (await catalogService.GetCountries()) ?? [];
-            var states = (await catalogService.GetStates(locaCountryID)) ?? [];
+            // * fetch the municipalities
             var municipalities = (await catalogService.GetMunicipalities(localStateID)) ?? [];
+            
+            // * if search param is passed, ignore the filters and serach the municipalities
             if (!string.IsNullOrEmpty(searchText))
             {
-                municipalities = municipalities.Where(item => item.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                municipalities = await catalogService.GetMunicipalities(stateId: 0, search: searchText) ?? [];
             }
-            this._logger.LogDebug("Total Municipios: {total}", states.Count());
+            this._logger.LogDebug("LocaCountryID: {country}, LocalStateID: {stateId}, Total Municipios: {total} ", locaCountryID, localStateID, municipalities.Count());
 
+            // * prepare the view
             var viewModel = new CatalogStatesViewModel
             {
                 CountryId = locaCountryID,
@@ -221,7 +225,6 @@ namespace DirectorySite.Controllers
                 Municipalities = municipalities.ToList(),
                 SearchText = searchText
             };
-
             ViewData["Title"] = "Catalogo - Municipios";
             ViewData["ActivePage"] = "Municipios";
             return View(viewModel);
@@ -273,31 +276,37 @@ namespace DirectorySite.Controllers
         [Route("Colonies")]
         public async Task<IActionResult> Colonies(int? countryId, int? stateId, int? municipalityId, string? searchText)
         {
-            if(countryId != null && countryId > 0)
+            locaCountryID = countryId ?? 138;
+            localStateID = stateId ?? 28;
+            localMunicipalityId = municipalityId ?? 41;
+
+            // * get the coutry and states catalogs
+            var countries = await catalogService.GetCountries() ?? [];
+
+            var states = await catalogService.GetStates(locaCountryID) ?? [];
+            // * override the localStateID if is not ont he catalog
+            if (!states.Select(item => item.Id).Contains(localStateID))
             {
-                locaCountryID = countryId.Value;
+                localStateID = states.FirstOrDefault()?.Id ?? -1;
             }
 
-            if(stateId != null && stateId > 0)
+            var municipalities = await catalogService.GetMunicipalities(localStateID) ?? [];
+            // * override the municipalityId if is not ont he catalog
+            if (!municipalities.Select(item => item.Id).Contains(localMunicipalityId))
             {
-                localStateID = stateId.Value;
+                localMunicipalityId = municipalities.FirstOrDefault()?.Id ?? -1;
             }
 
-            if(municipalityId != null && municipalityId > 0)
-            {
-                localMunicipalityId = municipalityId.Value;
-            }
+            var colonies = await catalogService.GetColonies(localMunicipalityId) ?? [];
 
-            var countries = (await catalogService.GetCountries()) ?? [];
-            var states = (await catalogService.GetStates(locaCountryID)) ?? [];
-            var municipalities = (await catalogService.GetMunicipalities(localStateID)) ?? [];
-            var colonies = (await catalogService.GetColonies(localMunicipalityId)) ?? [];
+            // * if search param is passed, ignore the filters and serach the municipalities
             if (!string.IsNullOrEmpty(searchText))
             {
-                colonies = colonies.Where(item => item.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                colonies = await catalogService.GetColonies(municipalityId: 0, search: searchText) ?? [];
             }
             this._logger.LogDebug("Total Municipios: {total}", states.Count());
 
+            // * prepare the view
             var viewModel = new CatalogStatesViewModel
             {
                 CountryId = locaCountryID,
@@ -309,7 +318,6 @@ namespace DirectorySite.Controllers
                 Colonies = colonies.ToList(),
                 SearchText = searchText
             };
-
             ViewData["Title"] = "Catalogo - Colonias";
             ViewData["ActivePage"] = "Colonias";
             return View(viewModel);

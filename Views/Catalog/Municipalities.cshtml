@@ -38,8 +38,9 @@
                         <tr>
                         <th scope="col">#</th>
                         <th scope="col">Id</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Actions</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,6 +51,10 @@
                                     <th scope="row">@i</th>
                                     <td>@item.Id</td>
                                     <td>@item.Name</td>
+                                    @{
+                                        var _name = new string?[]{ item.State?.Name, item.State?.Country?.Name };
+                                    }
+                                    <td class="small pt-2">@string.Join(", ", _name).ToUpper()</td>
                                     <td>
                                         <a asp-action="Colonies" asp-controller="Catalog" asp-route-countryId="@Model.CountryId" asp-route-stateId="@Model.StateId" asp-route-municipalityId="@item.Id" class="btn btn-link m-0 p-0" tabindex="-1" role="button" aria-disabled="true">
                                             Mostrar Colonias
@@ -153,9 +158,14 @@
             $("#newElementModal").modal('hide');
         }
 
-        $(document).ready(function(){
+        $(document).ready(function()
+        {
+            @* Select the default values *@
+            $("#selectState").val('@Model.StateId');
+
+
             $("#new-element-form").submit(handleSubmitForm);
-            
+
             $("#selectCountry").on("change", function(e){
                 var constryId = $(this).val();
                 if (isNaN(constryId) || constryId <= 0) {
