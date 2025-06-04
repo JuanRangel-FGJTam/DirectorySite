@@ -23,20 +23,21 @@
                     <input id="tb_search" asp-for="SearchText" type="search" class="form-control" placeholder="Buscar..." />
                 </div>
 
-                <button type="button" class="ml-auto ms-auto btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#newElementModal">
+                <a asp-action="CreateState" class="btn btn-primary btn-sm ml-auto ms-auto">
                     <svg width="12" height="12" aria-hidden="true" data-prefix="far" data-icon="plus" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="svg-inline--fa fa-plus fa-w-12 fa-7x"><path fill="currentColor" d="M368 224H224V80c0-8.84-7.16-16-16-16h-32c-8.84 0-16 7.16-16 16v144H16c-8.84 0-16 7.16-16 16v32c0 8.84 7.16 16 16 16h144v144c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16V288h144c8.84 0 16-7.16 16-16v-32c0-8.84-7.16-16-16-16z" class=""></path></svg>
                     Agregar Nuevo
-                </button>
+                </a>
             </form>
 
             <div class="border rounded">
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Id</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Actions</th>
+                            <th scope="col">#</th>
+                            <th scope="col">Id</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Pais</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,6 +48,7 @@
                                     <th scope="row">@i</th>
                                     <td>@item.Id</td>
                                     <td>@item.Name</td>
+                                    <td>@item.Country?.Name</td>
                                     <td>
                                         <a asp-action="Municipalities" asp-controller="Catalog" asp-route-countryId="@Model.CountryId" asp-route-stateId="@item.Id" class="btn btn-link m-0 p-0" tabindex="-1" role="button" aria-disabled="true">
                                             Mostrar Municipios
@@ -63,92 +65,9 @@
     </div>
 </div>
 
-<!-- Modals -->
-<div class="modal fade" id="newElementModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
-  <div class="modal-dialog">
-    <form id="new-element-form" class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Agregar elemento</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body">
-        <div class="mb-2">
-            <label for="new-element-country" class="col-form-label">Pais</label>
-            @Html.TextBoxFor(item => item.CountryId, new { @class="form-control", @hidden="true"})
-            @Html.TextBoxFor(item => item.CountryName, new { @class="form-control", @disabled="true"})
-        </div>
-      
-        <div class="mb-2">
-            <label for="new-element-name" class="col-form-label">Nombre:</label>
-            <input type="text" class="form-control" id="new-element-name" name="name" required>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="submit" class="btn btn-success" id="new-element-submit" >Guardar Cambios</button>
-      </div>
-
-    </form>
-  </div>
-</div>
-
 @section Scripts {
     <script>
-
-        function handleSubmitForm(event){
-            event.preventDefault();
-            
-            const form = $(this);
-            const dataForm = form.serialize();
-            
-            $.ajax({
-                url: '/catalog/states',
-                type: 'POST',
-                data: dataForm,
-                success: function(response) {
-                    Swal.fire({
-                        title: "Datos actualizados",
-                        icon: "success"
-                    })
-                    .then(()=>{
-                        dimissModal();
-                        location.reload();
-                    });
-                },
-                error: function(xhr, status, error) {
-                    if(xhr.status == 422)
-                    {
-                        const { errors } = xhr.responseJSON || {};
-                        const errorMessages = errors ? Object.values(errors).flat().join('\n') : "Datos inválidos.";
-                        Swal.fire({
-                            title: "Uno o más datos son inválidos",
-                            text: errorMessages,
-                            icon: "warning",
-                            confirmButtonText: "Revisar"
-                        });
-                        return;
-                    }
-
-                    Swal.fire({
-                        title: "Error al actualizar los datos",
-                        text: xhr.statusText || "Error desconocido",
-                        icon: "error"
-                    });
-                }
-            });
-
-        }
-
-        function dimissModal(){
-            $("#new-element-name").val("");
-            $("#newElementModal").modal('hide');
-        }
-
         $(document).ready(function(){
-            $("#new-element-form").submit(handleSubmitForm);
-            
             $("#selectCountry").on("change", function(e){
                 var constryId = $(this).val();
 
@@ -157,10 +76,9 @@
                     event.preventDefault();
                     return;
                 }
-                
+
                 $("#formFilters").submit();
             });
         });
-
     </script>
 }

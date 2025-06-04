@@ -151,13 +151,17 @@ namespace DirectorySite.Services
             return null;
         }
         
-        public async Task<IEnumerable<State>?> GetStates(int countryId = 0)
+        public async Task<IEnumerable<State>?> GetStates(int countryId = 0, string? search = null)
         {
-
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var args = new string[]
+            {
+                $"country_id={countryId}",
+                $"search={search}"
+            };
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/states?country_id={countryId}"),
+                RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/states?" + string.Join("&", args)),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
@@ -173,12 +177,17 @@ namespace DirectorySite.Services
             return null;
         }
         
-        public async Task<IEnumerable<Municipality>?> GetMunicipalities(int stateId = 0)
+        public async Task<IEnumerable<Municipality>?> GetMunicipalities(int stateId = 0, string? search = null)
         {
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var args = new string[]
+            {
+                $"state_id={stateId}",
+                $"search={search}"
+            };
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/municipalities?state_id={stateId}"),
+                RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/municipalities?" + string.Join("&", args)),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
@@ -194,12 +203,17 @@ namespace DirectorySite.Services
             return null;
         }
 
-        public async Task<IEnumerable<Colony>?> GetColonies(int municipalityId = 0)
+        public async Task<IEnumerable<Colony>?> GetColonies(int municipalityId = 0, string? search = null)
         {
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var args = new string[]
+            {
+                $"municipality_id={municipalityId}",
+                $"search={search}"
+            };
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/catalog/colonies?municipality_id={municipalityId}"),
+                RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/colonies?" + string.Join("&", args)),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
