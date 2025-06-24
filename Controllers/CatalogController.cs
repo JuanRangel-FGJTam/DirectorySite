@@ -122,6 +122,7 @@ namespace DirectorySite.Controllers
             return View(viewModel);
         }
 
+        #region Estados
         [Route("States")]
         public async Task<IActionResult> States(int? countryId, string? searchText )
         {
@@ -215,6 +216,35 @@ namespace DirectorySite.Controllers
             }
         }
 
+        [HttpGet("states/{id:int}")]
+        public async Task<IActionResult> EditState([FromRoute] int id)
+        {
+            var model = (await this.catalogService.GetStates())?.FirstOrDefault(item => item.Id == id);
+            if(model == null)
+            {
+                return RedirectToAction("States");
+            }
+            return View("StateEdit", model);
+        }
+
+        [HttpPost("states/{id:int}")]
+        public async Task<IActionResult> UpdateState([FromRoute] int id, Colony model)
+        {
+            try
+            {
+                await this.catalogService.UpdateState(id, model.Name);
+            }
+            catch(Exception err)
+            {
+                ViewBag.ErrorMessage = err.Message;
+                return View("StateEdit", model);
+            }
+            return RedirectToAction("States");
+        }
+
+        #endregion
+
+        #region Catalogo Municipios
         [Route("Municipalities")]
         public async Task<IActionResult> Municipalities(int? countryId, int? stateId, string? searchText)
         {
@@ -328,6 +358,36 @@ namespace DirectorySite.Controllers
             }
         }
 
+        [HttpGet("municipalities/{id:int}")]
+        public async Task<IActionResult> EditMunicipality([FromRoute] int id)
+        {
+            var model = (await this.catalogService.GetMunicipalities())?.FirstOrDefault(item => item.Id == id);
+            if(model == null)
+            {
+                return RedirectToAction("Municipalities");
+            }
+            return View("MunicipalityEdit", model);
+        }
+
+        [HttpPost("municipalities/{id:int}")]
+        public async Task<IActionResult> UpdateMunicipality([FromRoute] int id, Colony model)
+        {
+            try
+            {
+                await this.catalogService.UpdateMunicipality(id, model.Name);
+            }
+            catch(Exception err)
+            {
+                ViewBag.ErrorMessage = err.Message;
+                return View("MunicipalityEdit", model);
+            }
+            return RedirectToAction("Municipalities");
+        }
+
+        #endregion
+
+
+        #region Catalogo Colonias
         [Route("Colonies")]
         public async Task<IActionResult> Colonies(int? countryId, int? stateId, int? municipalityId, string? searchText)
         {
@@ -463,6 +523,35 @@ namespace DirectorySite.Controllers
                 });
             }
         }
+
+        [HttpGet("colonies/{id:int}")]
+        public async Task<IActionResult> EditColony([FromRoute] int id)
+        {
+            var model = (await this.catalogService.GetColonies())?.FirstOrDefault(item => item.Id == id);
+            if(model == null)
+            {
+                return RedirectToAction("Colonies");
+            }
+            return View("ColonyEdit", model);
+        }
+
+        [HttpPost("colonies/{id:int}")]
+        public async Task<IActionResult> UpdateColony([FromRoute] int id, Colony model)
+        {
+            try
+            {
+                await this.catalogService.UpdateColony(id, model.Name, model.ZipCode?.ToString());
+            }
+            catch(Exception err)
+            {
+                ViewBag.ErrorMessage = err.Message;
+                return View("ColonyEdit", model);
+            }
+            return RedirectToAction("Colonies");
+        }
+
+        #endregion
+
 
         [HttpPost]
         [Route("occupations")]
