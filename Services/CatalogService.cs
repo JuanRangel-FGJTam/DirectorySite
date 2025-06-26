@@ -229,6 +229,42 @@ namespace DirectorySite.Services
             return null;
         }
 
+        public async Task<int> UpdateColony(int colonyId, string name, string? zipCode)
+        {
+            var payload = new
+            {
+                Name = name,
+                ZipCode = zipCode
+            };
+
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/colonies/" + colonyId),
+                Method = HttpMethod.Patch,
+                Content = JsonContent.Create(payload)
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            
+            var httpResponse = await httpClient.SendAsync( httpRequest );
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                return 0;
+            }
+
+            if (httpResponse.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
+            {
+                var responseMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(await httpResponse.Content.ReadAsStringAsync());
+                var errorsMessageList = GetAllValues(responseMessage!.errors);
+                var errorMessage = string.Join(",", errorsMessageList);
+                throw new Exception(errorMessage);
+            }
+            
+            this.logger.LogError("Fail at get the catalog of colonies {statusCode}", httpResponse.StatusCode );
+            httpResponse.EnsureSuccessStatusCode();
+            return 1;
+        }
+
         public async Task<IEnumerable<Role>?> GetRoles()
         {
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
@@ -237,22 +273,23 @@ namespace DirectorySite.Services
                 RequestUri = new Uri(httpClient.BaseAddress!, "/user/roles-availables"),
                 Method = HttpMethod.Get
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
-            
-            var httpResponse = await httpClient.SendAsync( httpRequest );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken);
 
-            if( httpResponse.IsSuccessStatusCode ){
+            var httpResponse = await httpClient.SendAsync(httpRequest);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
                 var data = await httpResponse.Content.ReadFromJsonAsync<IEnumerable<Role>>();
                 return data;
             }
 
-            this.logger.LogError("Error at get catalog of user roles " + httpResponse.StatusCode );
+            this.logger.LogError("Error at get catalog of user roles " + httpResponse.StatusCode);
             return null;
         }
     
         public async Task<int> StoreNewState(int countryId, string name)
         {
-            var payload =  new {
+            var payload = new {
                 CountryId = countryId,
                 Name = name
             };
@@ -271,14 +308,50 @@ namespace DirectorySite.Services
             
         }
 
+        public async Task<int> UpdateState(int stateId, string name)
+        {
+            var payload = new
+            {
+                Name = name
+            };
+
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/states/" + stateId),
+                Method = HttpMethod.Patch,
+                Content = JsonContent.Create(payload)
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            
+            var httpResponse = await httpClient.SendAsync( httpRequest );
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                return 0;
+            }
+
+            if (httpResponse.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
+            {
+                var responseMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(await httpResponse.Content.ReadAsStringAsync());
+                var errorsMessageList = GetAllValues(responseMessage!.errors);
+                var errorMessage = string.Join(",", errorsMessageList);
+                throw new Exception(errorMessage);
+            }
+            
+            this.logger.LogError("Fail at get the catalog of colonies {statusCode}", httpResponse.StatusCode );
+            httpResponse.EnsureSuccessStatusCode();
+            return 1;
+        }
+
         public async Task<int> StoreNewMunicipality(int countryId, int stateId, string name)
         {
-            var payload = new {
+            var payload = new
+            {
                 CountryId = countryId,
                 StateId = stateId,
                 Name = name
             };
-            
+
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
@@ -286,16 +359,52 @@ namespace DirectorySite.Services
                 Method = HttpMethod.Post,
                 Content = JsonContent.Create(payload)
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken);
             var httpResponse = await httpClient.SendAsync(httpRequest);
             httpResponse.EnsureSuccessStatusCode();
             return 1;
+
+        }
+
+        public async Task<int> UpdateMunicipality(int municipalityId, string name)
+        {
+            var payload = new
+            {
+                Name = name
+            };
+
+            var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri(httpClient.BaseAddress!, "/api/catalog/municipalities/" + municipalityId),
+                Method = HttpMethod.Patch,
+                Content = JsonContent.Create(payload)
+            };
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
             
+            var httpResponse = await httpClient.SendAsync( httpRequest );
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                return 0;
+            }
+
+            if (httpResponse.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
+            {
+                var responseMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(await httpResponse.Content.ReadAsStringAsync());
+                var errorsMessageList = GetAllValues(responseMessage!.errors);
+                var errorMessage = string.Join(",", errorsMessageList);
+                throw new Exception(errorMessage);
+            }
+            
+            this.logger.LogError("Fail at get the catalog of colonies {statusCode}", httpResponse.StatusCode );
+            httpResponse.EnsureSuccessStatusCode();
+            return 1;
         }
 
         public async Task<int> StoreNewColony(int countryId, int stateId, int municipalityId, string name, int zipCode)
         {
-            var payload = new {
+            var payload = new
+            {
                 CountryId = countryId,
                 StateId = stateId,
                 MunicipalityId = municipalityId,
@@ -304,7 +413,7 @@ namespace DirectorySite.Services
             };
 
             var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
-            
+
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
@@ -312,7 +421,7 @@ namespace DirectorySite.Services
                 Method = HttpMethod.Post,
                 Content = JsonContent.Create(payload)
             };
-            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken );
+            httpRequest.Headers.Add("Authorization", "Bearer " + AuthToken);
             var httpResponse = await httpClient.SendAsync(httpRequest);
             httpResponse.EnsureSuccessStatusCode();
             return 1;

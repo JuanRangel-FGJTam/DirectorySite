@@ -40,7 +40,7 @@
                         <th scope="col">Id</th>
                         <th scope="col">Nombre</th>
                         <th scope="col">Estado</th>
-                        <th scope="col">Acciones</th>
+                        <th scope="col"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,9 +55,13 @@
                                         var _name = new string?[]{ item.State?.Name, item.State?.Country?.Name };
                                     }
                                     <td class="small pt-2">@string.Join(", ", _name).ToUpper()</td>
-                                    <td>
-                                        <a asp-action="Colonies" asp-controller="Catalog" asp-route-countryId="@Model.CountryId" asp-route-stateId="@Model.StateId" asp-route-municipalityId="@item.Id" class="btn btn-link m-0 p-0" tabindex="-1" role="button" aria-disabled="true">
+                                    <td class="d-flex align-items-center justify-content-end">
+                                        <a asp-action="Colonies" asp-controller="Catalog" asp-route-countryId="@Model.CountryId" asp-route-stateId="@Model.StateId" asp-route-municipalityId="@item.Id" class="btn btn-primary btn-sm m-0 px-2" tabindex="-1" role="button" aria-disabled="true">
                                             Mostrar Colonias
+                                        </a>
+
+                                        <a asp-action="EditMunicipality" asp-route-id="@(item.Id)" class="btn btn-primary btn-sm ml-2 ms-2 px-2">
+                                            Editar
                                         </a>
                                     </td>
                                 </tr>
