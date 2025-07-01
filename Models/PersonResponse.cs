@@ -62,6 +62,9 @@ namespace DirectorySite.Models
         [JsonPropertyName("bannedAt")]
         public DateTime? BannedAt { get; set; }
 
+        [JsonPropertyName("bannedReason")]
+        public string? BannedReason { get; set; }
+
         [JsonPropertyName("fullName")]
         public string? FullName { get; set; }
 
