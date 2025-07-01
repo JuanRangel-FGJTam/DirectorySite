@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProcedureResponse>
+﻿@model PagedResponse<ProcedureResponse>
 
 <div class="row align-items-start">
     <div class="col-12">
@@ -20,7 +20,8 @@
                 @{
                     var i = 1;
                 }
-                @foreach( var pro in Model){
+                @foreach(var pro in Model.Items)
+                {
                     <tr>
                         <td scope="row">@i</td>
                         <td>@pro.Name</td>
@@ -53,10 +54,21 @@
                     i++;
                 }
 
-                @if(!Model.Any()){
+                @if(!Model.Items.Any())
+                {
                     <tr>
-                        <td colspan="6" scope="row">
+                        <td colspan="9" scope="row">
                             No hay registros
+                        </td>
+                    </tr>
+                }
+                @if(Model.TotalItems > Model.PageSize)
+                {
+                    <tr>
+                        <td colspan="9" scope="row">
+                            <a asp-action="GetPersonProcedures" asp-route-PersonId="@ViewBag.PersonID" class="btn btn-link">
+                                Mostrar todos los tramites...
+                            </a>
                         </td>
                     </tr>
                 }

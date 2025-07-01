@@ -25,7 +25,7 @@ namespace DirectorySite.Services
         /// <exception cref="KeyNotFoundException">The person is not found</exception>
         /// <exception cref="UnauthorizedAccessException">The auth token is not valid or is missing</exception>
         /// <exception cref="Exception"> Fail at get the data</exception>
-        public async Task<IEnumerable<ProcedureResponse>> GetProceduresOfPerson(string personID, int take = 25, int skip = 0){
+        public async Task<PagedResponse<ProcedureResponse>> GetProceduresOfPerson(string personID, int take = 25, int skip = 0){
             
             // * get the auth token
             string authToken = string.Empty;
@@ -43,18 +43,19 @@ namespace DirectorySite.Services
             var httpClient = httpClientFactory.CreateClient("DirectoryAPI");
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/people/{personID}/procedures?take={take}&skip={skip}"),
+                RequestUri = new Uri(httpClient.BaseAddress!, $"/api/people/{personID}/procedures?take={take}&offset={skip}"),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("Authorization", "Bearer " + authToken );
             
             // * attempt to get the procedures data
-            IEnumerable<ProcedureResponse>? responseData = null;
+            PagedResponse<ProcedureResponse> responseData = default!;
             try
             {
                 var httpResponse = await httpClient.SendAsync(httpRequest);
                 httpResponse.EnsureSuccessStatusCode();
-                responseData = await httpResponse.Content.ReadFromJsonAsync<IEnumerable<ProcedureResponse>>();
+                responseData = await httpResponse.Content.ReadFromJsonAsync<PagedResponse<ProcedureResponse>>()
+                    ?? throw new Exception("Failed to deserialize the procedures response data.");
             }
             catch(HttpRequestException httpe)
             {
@@ -73,7 +74,7 @@ namespace DirectorySite.Services
                 throw new Exception("Error at retrive the data", err);
             }
 
-            return responseData ?? [];
+            return responseData!;
         }
 
     }

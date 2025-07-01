@@ -56,7 +56,7 @@ namespace DirectorySite.Controllers
                 viewModel.People = await this.peopleSearchService.SearchPerson(viewModel.Search) ?? [];
                 return View(viewModel);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at search the person");
                 ViewBag.ErrorMessage = "Error al realizar la busqueda, " + err.Message;
@@ -67,26 +67,27 @@ namespace DirectorySite.Controllers
 
         [HttpGet]
         [Route("{personID}")]
-        public async Task<IActionResult> Person([FromRoute] string personID, [FromQuery] string? searchText){
+        public async Task<IActionResult> Person([FromRoute] string personID, [FromQuery] string? searchText)
+        {
             PersonResponse? personResponse = null;
             try
             {
                 personResponse = await this.peopleService.GetPersonById(personID);
             }
-            catch(UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 return RedirectToAction("Index", "People");
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
             }
 
-            if(!string.IsNullOrEmpty(searchText))
+            if (!string.IsNullOrEmpty(searchText))
             {
                 ViewBag.SearchText = searchText;
             }
-            
+
             return View(personResponse);
         }
 
@@ -99,11 +100,11 @@ namespace DirectorySite.Controllers
             {
                 personResponse = await this.peopleService.GetPersonById(personID);
             }
-            catch(UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 return RedirectToAction("Index", "People");
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
                 return View("~/Views/Shared/Error.cshtml", new ErrorViewModel
@@ -111,9 +112,9 @@ namespace DirectorySite.Controllers
                     Message = "Error al obtene los datos del usuario."
                 });
             }
-            
+
             // *  verify if the person is found
-            if(personResponse == null)
+            if (personResponse == null)
             {
                 ViewBag.NotFoundMessage = "La persona no se encuntra registrada en el sistema";
                 return View("~/Views/Shared/NotFound.cshtml");
@@ -144,14 +145,15 @@ namespace DirectorySite.Controllers
             {
                 personResponse = await this.peopleService.GetPersonById(personID);
             }
-            catch(UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 return Unauthorized();
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
-                return Conflict( new {
+                return Conflict(new
+                {
                     Message = "Error al obtene los datos del usuario."
                 });
             }
@@ -173,7 +175,8 @@ namespace DirectorySite.Controllers
             }
             catch (ArgumentException ae)
             {
-                return BadRequest(new {
+                return BadRequest(new
+                {
                     ae.Message
                 });
             }
@@ -181,7 +184,7 @@ namespace DirectorySite.Controllers
             {
                 return Conflict();
             }
-            
+
         }
 
         [HttpPatch]
@@ -196,15 +199,16 @@ namespace DirectorySite.Controllers
             {
                 personResponse = await this.peopleService.GetPersonById(personID);
             }
-            catch(UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 this._logger.LogInformation("Redirect");
                 return Unauthorized();
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
-                return Conflict( new {
+                return Conflict(new
+                {
                     Message = "Error al obtene los datos del usuario."
                 });
             }
@@ -221,7 +225,8 @@ namespace DirectorySite.Controllers
             }
             catch (ArgumentException ae)
             {
-                return BadRequest(new {
+                return BadRequest(new
+                {
                     ae.Message
                 });
             }
@@ -230,7 +235,7 @@ namespace DirectorySite.Controllers
                 return Conflict();
             }
         }
-        
+
         [HttpPatch]
         [Route("{personID}/contact")]
         [Consumes(MediaTypeNames.Application.FormUrlEncoded)]
@@ -243,15 +248,16 @@ namespace DirectorySite.Controllers
             {
                 personResponse = await this.peopleService.GetPersonById(personID);
             }
-            catch(UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 this._logger.LogInformation("Redirect");
                 return Unauthorized();
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
-                return Conflict( new {
+                return Conflict(new
+                {
                     Message = "Error al obtene los datos del usuario."
                 });
             }
@@ -260,7 +266,7 @@ namespace DirectorySite.Controllers
             try
             {
                 // * check the contact type
-                if(request.ContactTypeId <= 0)
+                if (request.ContactTypeId <= 0)
                 {
                     request.ContactTypeId = PhonenumberContactType;
                 }
@@ -274,7 +280,8 @@ namespace DirectorySite.Controllers
             }
             catch (ArgumentException ae)
             {
-                return BadRequest(new {
+                return BadRequest(new
+                {
                     ae.Message
                 });
             }
@@ -284,17 +291,45 @@ namespace DirectorySite.Controllers
             }
         }
 
+        [HttpGet("{personID}/all-procedures")]
+        public async Task<IActionResult> GetPersonProcedures([FromRoute] string personID, [FromQuery] int p = 1)
+        {
+            var (actionResult, personResponse) = await LoadPersonResponse(personID);
+            if (actionResult != null) return actionResult;
+            if (personResponse == null) throw new NullReferenceException();
+
+            // * retrive the data
+            const int pageSize = 50;
+            int offset = (p - 1) * pageSize;
+            var pageResponse = await this.peopleProcedureService.GetProceduresOfPerson(personResponse.PersonId!, pageSize, offset);
+            if (pageResponse == null)
+            {
+                this._logger.LogError("Error al obtener los procedimientos de la persona");
+                return View("~/Views/Shared/Error.cshtml", new ErrorViewModel {
+                    Message = "Error al obtene los datos procedimientos de la persona."
+                });
+            }
+
+            // * return the view
+            ViewData["Title"] = $"Listado de Tramites de {personResponse.FullName}";
+            ViewBag.CurrentPage = p;
+            ViewBag.TotalPages = (int) Math.Ceiling( (double) pageResponse.TotalItems / pageSize);
+            ViewBag.PersonResponse = personResponse;
+            return View("PersonAllProcedures", pageResponse);
+        }
+
         #region PartialViews
         [HttpGet]
         [Route("{personID}/sessions")]
-        public async Task<IActionResult> GetSessionPartialView([FromRoute] string personID){
+        public async Task<IActionResult> GetSessionPartialView([FromRoute] string personID)
+        {
             SessionsResponse? sessionsData = null;
             try
             {
-                sessionsData = await this.peopleSessionService.GetSessionsOfPerson(personID, take:5, skip:0);
+                sessionsData = await this.peopleSessionService.GetSessionsOfPerson(personID, take: 5, skip: 0);
                 return PartialView("~/Views/People/Partials/PersonSessions.cshtml", sessionsData);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at get the sessions data of the person '{personId}'", personID);
                 ViewData["ErrorTitle"] = "Error al obtener las sesiones del usuario";
@@ -305,14 +340,16 @@ namespace DirectorySite.Controllers
 
         [HttpGet]
         [Route("{personID}/procedures")]
-        public async Task<IActionResult> GetProceduresPartialView([FromRoute] string personID){
-            IEnumerable<ProcedureResponse> procedureResponses = [];
+        public async Task<IActionResult> GetProceduresPartialView([FromRoute] string personID)
+        {
+            PagedResponse<ProcedureResponse> procedureResponses = default!;
             try
             {
-                procedureResponses = await this.peopleProcedureService.GetProceduresOfPerson(personID, take:5, skip:0);
+                ViewBag.PersonID = personID;
+                procedureResponses = await this.peopleProcedureService.GetProceduresOfPerson(personID, take: 5, skip: 0);
                 return PartialView("~/Views/People/Partials/PersonProcedures.cshtml", procedureResponses);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at get the procedures data of the person '{personId}'", personID);
                 ViewData["ErrorTitle"] = "Error al obtener los procedimientos del usuario";
@@ -329,16 +366,16 @@ namespace DirectorySite.Controllers
             try
             {
                 personDocuments = await this.peopleDocumentService.GetPeopleDocuments(Guid.Parse(personID));
-                if(personDocuments.Any())
+                if (personDocuments.Any())
                 {
                     personDocuments = personDocuments
                         .GroupBy(item => item.DocumentTypeId)
-                        .Select( g => g.OrderByDescending(i => i.CreatedAt).First())
+                        .Select(g => g.OrderByDescending(i => i.CreatedAt).First())
                         .ToArray();
                 }
                 return PartialView("~/Views/People/Partials/PersonDocuments.cshtml", personDocuments);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at get the documents of the person '{personId}'", personID);
                 ViewData["ErrorTitle"] = "Error al obtener los documentos del usuario";
@@ -355,10 +392,10 @@ namespace DirectorySite.Controllers
             try
             {
                 var _personId = Guid.Parse(personId);
-                accountRecoveyList = await this.recoveryAccountService.GetRequestFromAPerson(_personId, take:5, offset:0);
+                accountRecoveyList = await this.recoveryAccountService.GetRequestFromAPerson(_personId, take: 5, offset: 0);
                 return PartialView("~/Views/People/Partials/PersonAccountRecovery.cshtml", accountRecoveyList);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 this._logger.LogError(err, "Fail at get the recovery account request data of the person '{personId}'", personId);
                 ViewData["ErrorTitle"] = "Error al obtener las peticiones de recuperacion de cuenta del usuario";
@@ -398,7 +435,8 @@ namespace DirectorySite.Controllers
             await Task.WhenAll(catalogsTask);
 
             // * prepare request models
-            var updatePersonGeneralsRequest = new UpdatePersonGeneralsRequest {
+            var updatePersonGeneralsRequest = new UpdatePersonGeneralsRequest
+            {
                 Name = personResponse.Name,
                 FirstName = personResponse.FirstName,
                 LastName = personResponse.LastName,
@@ -409,10 +447,10 @@ namespace DirectorySite.Controllers
                 MaritalStatusId = personResponse.MaritalStatusId,
                 NationalityId = personResponse.NationalityId,
                 OccupationId = personResponse.OccupationId,
-                Genders = genders.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
-                MaritalStatuses = maritalStatuses.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
-                Nationalities = nationalities.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
-                Occupations = occupations.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+                Genders = genders.Select(g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+                MaritalStatuses = maritalStatuses.Select(g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+                Nationalities = nationalities.Select(g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+                Occupations = occupations.Select(g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
             };
 
             return updatePersonGeneralsRequest;
@@ -422,7 +460,8 @@ namespace DirectorySite.Controllers
         {
             await Task.CompletedTask;
             // * prepare request models
-            var updatePersonGeneralsRequest = new UpdatePersonEmailRequest {
+            var updatePersonGeneralsRequest = new UpdatePersonEmailRequest
+            {
                 Email = personResponse.Email
             };
             return updatePersonGeneralsRequest;
@@ -437,13 +476,51 @@ namespace DirectorySite.Controllers
             var contactInfo = personResponse.ContactInformation?.FirstOrDefault(item => item.ContactTypeId == PhonenumberContactType);
 
             // * prepare request models
-            var updatePersonGeneralsRequest = new UpdatePersonContactRequest {
+            var updatePersonGeneralsRequest = new UpdatePersonContactRequest
+            {
                 ContactTypeId = PhonenumberContactType,
-                Value = contactInfo == null ? "": contactInfo.Value,
-                ContactTypes = contactTypes.Select( g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
+                Value = contactInfo == null ? "" : contactInfo.Value,
+                ContactTypes = contactTypes.Select(g => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(g.Name, g.Id.ToString())),
             };
 
             return updatePersonGeneralsRequest;
+        }
+
+        private async Task<(ActionResult?, PersonResponse?)> LoadPersonResponse(string personID)
+        {
+            PersonResponse? personResponse = null;
+            try
+            {
+                personResponse = await this.peopleService.GetPersonById(personID);
+                // * verify if the person is found
+                if (personResponse == null)
+                {
+                    ViewBag.NotFoundMessage = "La persona no se encuntra registrada en el sistema";
+                    return (
+                        View("~/Views/Shared/NotFound.cshtml"),
+                        personResponse
+                    );
+                }
+                return (null, personResponse);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return (
+                    RedirectToAction("Index", "People"),
+                    personResponse
+                );
+            }
+            catch (Exception err)
+            {
+                this._logger.LogError(err, "Fail at get the data of the person '{personId}'", personID);
+                return (
+                    View("~/Views/Shared/Error.cshtml", new ErrorViewModel
+                    {
+                        Message = "Error al obtene los datos del usuario."
+                    }),
+                    personResponse
+                );
+            }
         }
 
         #endregion
