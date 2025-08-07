@@ -2,6 +2,7 @@
 @{
     ViewData["ActivePage"] = "Peticion";
     var edition = (Model.AttendingAt == null && Model.DeletedAt == null);
+    IEnumerable<SearchPersonResponse> peopleCoincidences = ViewBag.PeopleCoincidences;
 }
 @functions
 {
@@ -162,19 +163,14 @@
     </div>
 </div>
 
-
 <div class="container mt-2">
     <div class="row align-items-start">
         <div class="col-12 border-bottom mb-2">
             <h4>Coincidencia de Personas</h4>
         </div>
-        <div id="table-coincidences" class="col-12">
-            <div class="d-flex align-items-center alert alert-primary mt-3" role="alert">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <span class="mx-2" style="font-size: 1rem;">Cargando datos</span>
-            </div>
+
+        <div class="col-12">
+            @await Html.PartialAsync("./Partials/PeopleCoincidences.cshtml", peopleCoincidences)
         </div>
     </div>
 </div>
@@ -182,7 +178,7 @@
 
 <div class="container border border-2 rounded @(GetBorderColor()) rounded mt-4 mb-2 p-4">
     <form id="finishRequestForm" class="row" method="post">
-        <div class="col-12 border-bottom mb-2"> 
+        <div class="col-12 border-bottom mb-2">
             <h4 id="respuesta">Respuesta</h4>
         </div>
 
@@ -202,7 +198,7 @@
             <label class="form-check-label" for="template">
                 Template de respuesta
             </label>
-                <select id="template" class="form-control">
+                <select id="template" class="form-control" onchange="responseTemplateChanged(event)">
                     <option selected disabled>Seleccione un elemento</option>
                     @foreach(var t in ViewBag.Templates)
                     {
@@ -210,6 +206,22 @@
                     }
                 </select>
         </div>
+        }
+
+        @if(!string.IsNullOrEmpty(ViewBag.CoincidencePersonName) && !string.IsNullOrEmpty(ViewBag.NewPersonEmail))
+        {
+            <div id="alert-warning-wrapper" class="col-12 px-4 pb-2 d-none">
+                <div class="alert alert-warning" role="alert">
+                    <strong>Se actualizara el correo de la persona '<span>@ViewBag.CoincidencePersonName</span>' por el correo '<span>@ViewBag.NewPersonEmail</span>'</strong>
+                </div>
+
+                <div class="form-check mb-4">
+                    <label class="form-check-label">
+                    <input id="updated-email" type="checkbox" class="form-check-input" value="checkedValue" checked>
+                        Actualizara automaticamente el electronico
+                    </label>
+                </div>
+            </div>
         }
 
         <div class="col-12">
@@ -276,6 +288,8 @@
             const messageText = $('#txtComments').val();
             const notifyEmail = $('#notifyEmail').is(':checked');
             const templateId = $('#template').val();
+            const updateEmail = $('#updated-email').is(':checked');
+
             if(templateId == undefined)
             {
                 Swal.fire({
@@ -290,6 +304,7 @@
             formData.append('comments', messageText);
             formData.append('notifyEmail', notifyEmail);
             formData.append('templateId', templateId);
+            formData.append('updateEmail', updateEmail);
 
             $.ajax({
                 url: url,
@@ -306,9 +321,11 @@
                     });
                 },
                 error: function(xhr, status, error) {
+                    var {message} = xhr.responseJSON;
                     console.error('Error:', error);
+
                     Swal.fire({
-                        title: "Error al realizar la peticion",
+                        title: message ?? "Error al realizar la peticion",
                         icon: "error"
                     });
                 }
@@ -320,11 +337,22 @@
             window.location.replace("@Url.Action("Index", "RecoveryAccount")");
         }
 
+        function responseTemplateChanged(event)
+        {
+            var _currentValue = Number($(event.target).val());
+            if(_currentValue != 1) // 1 => Solicitud Finalizada
+            {
+                $("#alert-warning-wrapper").addClass('d-none');
+                return;
+            }
+
+            $("#alert-warning-wrapper").removeClass('d-none');
+        }
+
         jQuery(document).ready(()=>
         {
             $("#btn-finish").on("click", finishRequest);
             $("#btn-back").on("click", goBackClick);
-            $("#table-coincidences").load(`/RecoveryAccount/people-coincidence?recordID=${currentRequestID}`);
         });
     </script>
 }
